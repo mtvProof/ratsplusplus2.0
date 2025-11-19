@@ -398,6 +398,7 @@ async function doUpdate(guildId, serverId){
   const smMap = server.storageMonitors || server.storagemonitors || {};
   const resIds   = [];
   const compIds  = [];
+  const boomIds  = [];
   const teasIds  = [];
   const bunkerIds= [];
 
@@ -406,6 +407,7 @@ async function doUpdate(guildId, serverId){
     const bucket = norm(mon.name);
     if (bucket === 'resources')      resIds.push(entityId);
     else if (bucket === 'components') compIds.push(entityId);
+    else if (bucket === 'boom')       boomIds.push(entityId);
     else if (bucket === 'teas')       teasIds.push(entityId);
     else if (bucket === 'bunker')     bunkerIds.push(entityId);
   }
@@ -419,12 +421,13 @@ async function doUpdate(guildId, serverId){
 
   const resConnected  = resIds.filter(isConnected);
   const compConnected = compIds.filter(isConnected);
+  const boomConnected = boomIds.filter(isConnected);
   const teasConnected = teasIds.filter(isConnected);
   const bunkerConnected = bunkerIds.filter(isConnected);
 
-  // Main loot room boxes (Resources, Components, Teas combined)
+  // Main loot room boxes (Resources, Components, Boom, Teas combined)
   const mainLootConnected = Array.from(new Set([
-    ...resConnected, ...compConnected, ...teasConnected
+    ...resConnected, ...compConnected, ...boomConnected, ...teasConnected
   ]));
 
 
@@ -432,6 +435,7 @@ async function doUpdate(guildId, serverId){
   const totals = {
     resources: Object.fromEntries(RESOURCE_KEYS.map(k => [k, 0])),
     components: Object.fromEntries(COMPONENT_KEYS.map(k => [k, 0])),
+    boom:       Object.fromEntries(BOOM_KEYS.map(k => [k, 0])),
     teas:       Object.fromEntries(TEA_KEYS.map(k => [k, 0])),
   };
 
@@ -469,6 +473,7 @@ async function doUpdate(guildId, serverId){
 
         if (RESOURCE_SET.has(can))       totalsAll.resources[can]  += qty;
         else if (COMPONENT_SET.has(can)) totalsAll.components[can] += qty;
+        else if (BOOM_SET.has(can))      totalsAll.boom[can]       += qty;
         else if (TEA_SET.has(can))       totalsAll.teas[can]       += qty;
         // else: ignore items that aren't tracked
       }
@@ -520,6 +525,7 @@ async function doUpdate(guildId, serverId){
   // Build embed – prefer totals if present; otherwise show NO_CONNECTED
   const resHas  = hasAnyTotals(totals.resources);
   const compHas = hasAnyTotals(totals.components);
+  const boomHas = hasAnyTotals(totals.boom);
   const teasHas = hasAnyTotals(totals.teas);
 
   const hasMainLoot = mainLootConnected.length > 0;
@@ -530,6 +536,10 @@ async function doUpdate(guildId, serverId){
 
   const componentsField = hasMainLoot && compHas
     ? formatLinesWithLimits(totals.components, COMPONENT_KEYS, mrc.limits)
+    : (hasMainLoot ? '`—`' : NO_CONNECTED);
+
+  const boomField = hasMainLoot && boomHas
+    ? formatLinesWithLimits(totals.boom, BOOM_KEYS, mrc.limits)
     : (hasMainLoot ? '`—`' : NO_CONNECTED);
 
   const teasField = hasMainLoot && teasHas
@@ -544,6 +554,7 @@ async function doUpdate(guildId, serverId){
     fields: [
       { name: 'Resources (Main Loot)',  value: resourcesField,  inline: true },
       { name: 'Components (Main Loot)', value: componentsField, inline: true },
+      { name: 'Boom (Main Loot)',       value: boomField,       inline: false },
       { name: 'Teas (Main Loot)',       value: teasField,       inline: false },
       { name: 'Bunkers',                value: bunkersField,    inline: false },
     ],
