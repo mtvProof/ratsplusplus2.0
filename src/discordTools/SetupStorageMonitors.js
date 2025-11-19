@@ -21,6 +21,7 @@
 const Constants = require('../util/constants.js');
 const DiscordMessages = require('./discordMessages.js');
 const DiscordTools = require('./discordTools.js');
+const { updateMainResourcesComps } = require('./MainResourcesCompsBox.js');
 
 module.exports = async (client, rustplus) => {
     const instance = client.getInstance(rustplus.guildId);
@@ -82,5 +83,12 @@ module.exports = async (client, rustplus) => {
         }
 
         await DiscordMessages.sendStorageMonitorMessage(guildId, serverId, entityId);
+    }
+
+    // Ensure Main Resources & Comps card is created/updated after all storage monitors are set up
+    try {
+        await updateMainResourcesComps(guildId, serverId);
+    } catch (e) {
+        client.log(client.intlGet(null, 'warningCap'), `updateMainResourcesComps failed in SetupStorageMonitors: ${e.message}`, 'warning');
     }
 };

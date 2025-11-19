@@ -1315,7 +1315,7 @@ return getEmbed({
     const instance = getClient().getInstance(guildId);
     const server = instance.serverList[serverId];
     return getEmbed({
-      color: Constants.COLOR_DEFAULT,
+      color: Constants.COLOR_NEW_VENDING_MACHINE,
       timestamp: true,
       footer: { text: server.title },
       author: { name: str }
