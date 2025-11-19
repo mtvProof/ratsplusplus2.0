@@ -29,129 +29,160 @@ const Map = require('../util/map.js');
 const Scrape = require('../util/scrape.js');
 
 module.exports = async (client, guild, steamId) => {
-    const credentials = InstanceUtils.readCredentialsFile(guild.id);
-    const hoster = credentials.hoster;
+  const credentials = InstanceUtils.readCredentialsFile(guild.id);
+  const hoster = credentials.hoster;
 
-    if (!Object.keys(credentials).includes(steamId)) {
-        client.log(client.intlGet(null, 'warningCap'), client.intlGet(null, 'credentialsNotRegistered', {
-            steamId: steamId
-        }));
-        return;
-    }
-
-    if (steamId === hoster) {
-        client.log(client.intlGet(null, 'warningCap'),
-            client.intlGet(null, 'credentialsCannotStartLiteAlreadyHoster', {
-                steamId: steamId
-            }));
-        return;
-    }
-
-    if (client.fcmListenersLite[guild.id][steamId]) {
-        client.fcmListenersLite[guild.id][steamId].destroy();
-        delete client.fcmListenersLite[guild.id][steamId];
-    }
-
-    client.log(client.intlGet(null, 'infoCap'), client.intlGet(null, 'fcmListenerStartLite', {
-        guildId: guild.id,
-        steamId: steamId
+  if (!Object.keys(credentials).includes(steamId)) {
+    client.log(client.intlGet(null, 'warningCap'), client.intlGet(null, 'credentialsNotRegistered', {
+      steamId: steamId
     }));
+    return;
+  }
 
-    const discordUserId = credentials[steamId].discord_user_id;
+  if (steamId === hoster) {
+    client.log(
+      client.intlGet(null, 'warningCap'),
+      client.intlGet(null, 'credentialsCannotStartLiteAlreadyHoster', { steamId })
+    );
+    return;
+  }
 
-    const androidId = credentials[steamId].gcm.android_id;
-    const securityToken = credentials[steamId].gcm.security_token;
-    client.fcmListenersLite[guild.id][steamId] = new PushReceiverClient(androidId, securityToken, [])
-    client.fcmListenersLite[guild.id][steamId].on('ON_DATA_RECEIVED', (data) => {
-        const appData = data.appData;
+  // ensure container exists
+  client.fcmListenersLite[guild.id] = client.fcmListenersLite[guild.id] || {};
 
-        if (!appData) {
-            client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${hoster}, appData could not be found.`)
-            return;
-        }
+  // tear down any old listener for this steamId
+  if (client.fcmListenersLite[guild.id][steamId]) {
+    client.fcmListenersLite[guild.id][steamId].destroy();
+    delete client.fcmListenersLite[guild.id][steamId];
+  }
 
-        const title = appData.find(item => item.key === 'title')?.value;
-        const message = appData.find(item => item.key === 'message')?.value;
-        const channelId = appData.find(item => item.key === 'channelId')?.value;
+  client.log(
+    client.intlGet(null, 'infoCap'),
+    client.intlGet(null, 'fcmListenerStartLite', { guildId: guild.id, steamId })
+  );
 
-        if (!channelId) {
-            client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${hoster}, channelId could not be found.`)
-            return;
-        }
+  const discordUserId = credentials[steamId].discord_user_id;
 
-        const bodyCheck = appData.find(item => item.key === 'body');
+  const androidId = credentials[steamId].gcm.android_id;
+  const securityToken = credentials[steamId].gcm.security_token;
 
-        if (!bodyCheck) {
-            client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${hoster}, body could not be found.`)
-            return;
-        }
+  client.fcmListenersLite[guild.id][steamId] = new PushReceiverClient(androidId, securityToken, []);
 
-        const body = JSON.parse(bodyCheck.value);
+  client.fcmListenersLite[guild.id][steamId].on('ON_DATA_RECEIVED', (data) => {
+    try {
+      const appData = data?.appData;
+      if (!appData) {
+        client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, appData could not be found.`);
+        return;
+      }
 
-        if (!body.type && channelId !== 'alarm') {
-            client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${hoster}, body type could not be found.`)
-            return;
-        }
+      const title   = appData.find(i => i.key === 'title')?.value ?? '';
+      const message = appData.find(i => i.key === 'message')?.value ?? '';
+      const channelId = appData.find(i => i.key === 'channelId')?.value ?? '';
 
-        switch (channelId) {
-            case 'pairing': {
-                switch (body.type) {
-                    case 'server': {
-                        client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: server`);
-                        pairingServer(client, guild, steamId, title, message, body);
-                    } break;
+      if (!channelId) {
+        client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, channelId could not be found.`);
+        return;
+      }
 
-                    case 'entity': {
-                        switch (body.entityName) {
-                            case 'Smart Switch': {
-                                client.log('FCM LITE',
-                                    `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: entity: Switch`);
-                                pairingEntitySwitch(client, guild, title, message, body);
-                            } break;
+      const bodyStr = appData.find(i => i.key === 'body')?.value;
+      if (!bodyStr) {
+        client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, body could not be found.`);
+        return;
+      }
 
-                            case 'Smart Alarm': {
-                                client.log('FCM LITE',
-                                    `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: entity: Smart Alarm`);
-                                pairingEntitySmartAlarm(client, guild, title, message, body);
-                            } break;
+      let body;
+      try {
+        body = JSON.parse(bodyStr);
+      } catch (e) {
+        client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, body JSON parse failed: ${e.message}`);
+        return;
+      }
 
-                            case 'Storage Monitor': {
-                                client.log('FCM LITE',
-                                    `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: entity: Storage Monitor`);
-                                pairingEntityStorageMonitor(client, guild, title, message, body);
-                            } break;
+      if (!body.type && channelId !== 'alarm') {
+        // some alarm pushes may lack type; others should have it
+        client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, body type could not be found.`);
+        return;
+      }
 
-                            default: {
-                                client.log('FCM LITE',
-                                    `GuildID: ${guild.id}, SteamID: ${steamId}, ` +
-                                    `pairing: entity: other\n${JSON.stringify(data)}`);
-                            } break;
-                        }
-                    } break;
-
-                    default: {
-                    } break;
+      switch (channelId) {
+        case 'pairing': {
+          switch (body.type) {
+            case 'server': {
+              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: server`);
+              pairingServer(client, guild, steamId, title, message, body);
+              break;
+            }
+            case 'entity': {
+              switch (body.entityName) {
+                case 'Smart Switch': {
+                  client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: entity: Switch`);
+                  pairingEntitySwitch(client, guild, title, message, body);
+                  break;
                 }
-            } break;
-
-            case 'player': {
-                switch (body.type) {
-                    case 'death': {
-                        client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, player: death`);
-                        playerDeath(client, guild, title, message, body, discordUserId);
-                    } break;
-
-                    default: {
-                    } break;
+                case 'Smart Alarm': {
+                  client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: entity: Smart Alarm`);
+                  pairingEntitySmartAlarm(client, guild, title, message, body);
+                  break;
                 }
-            } break;
+                case 'Storage Monitor': {
+                  client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: entity: Storage Monitor`);
+                  pairingEntityStorageMonitor(client, guild, title, message, body);
+                  break;
+                }
+                default: {
+                  client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, pairing: entity: other\n${JSON.stringify(data)}`);
+                  break;
+                }
+              }
+              break;
+            }
+            default:
+              break;
+          }
+          break;
+        }
 
+        case 'player': {
+          switch (body.type) {
+            case 'death': {
+              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, player: death`);
+              playerDeath(client, guild, title, message, body, discordUserId);
+              break;
+            }
+            default:
+              break;
+          }
+          break;
+        }
+
+        case 'alarm': {
+          switch (body.type) {
+            case 'alarm': {
+              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, alarm: alarm`);
+              alarmAlarmLite(client, guild, title, message, body);
+              break;
+            }
             default: {
-            } break;
+              // Some alarm pushes may not include type; just log for now
+              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, alarm: other\n${JSON.stringify(data)}`);
+              break;
+            }
+          }
+          break;
         }
-    });
 
-    client.fcmListenersLite[guild.id][steamId].connect();
+        default:
+          // unknown channel; ignore quietly
+          break;
+      }
+    } catch (e) {
+      client.log('WARN', `FCM LITE: onDataMessage error: ${e.message}`);
+    }
+  });
+
+  // connect after handlers are attached
+  client.fcmListenersLite[guild.id][steamId].connect();
 };
 
 function isValidUrl(url) {
@@ -160,23 +191,95 @@ function isValidUrl(url) {
 }
 
 async function pairingServer(client, guild, steamId, title, message, body) {
-    const instance = client.getInstance(guild.id);
-    const serverId = `${body.ip}-${body.port}`;
+  const instance = client.getInstance(guild.id);
 
-    if (!instance.serverListLite.hasOwnProperty(serverId)) instance.serverListLite[serverId] = new Object();
+  // Defensive guards: payload can be minimal
+  if (!body || typeof body !== 'object') {
+    client.log('WARN', 'FCM LITE: pairingServer received empty payload; skipping');
+    return;
+  }
 
-    instance.serverListLite[serverId][steamId] = {
-        serverIp: body.ip,
-        appPort: body.port,
-        steamId: body.playerId,
-        playerToken: body.playerToken,
+  const ip = body.ip;
+  const port = body.port;
+  if (!ip || !port) {
+    client.log('WARN', 'FCM LITE: pairingServer missing ip/port; skipping');
+    return;
+  }
+
+  const serverId = `${ip}-${port}`;
+  if (!instance.serverListLite.hasOwnProperty(serverId)) {
+    instance.serverListLite[serverId] = new Object();
+  }
+
+    // --- NEW: ensure a full server record exists so we can render the #servers widget ---
+  if (!instance.serverList) instance.serverList = {};
+  const serverExists = Object.prototype.hasOwnProperty.call(instance.serverList, serverId);
+
+  if (!serverExists) {
+    instance.serverList[serverId] = {
+      title: title || (body.name ?? 'Rust Server'),
+      serverIp: ip,
+      appPort: port,
+      steamId: body.playerId ?? steamId,
+      playerToken: body.playerToken ?? null,
+      description: (body.desc || '').replace(/\\n/g, '\n').replace(/\\t/g, '\t'),
+      img: isValidUrl(body.img) ? body.img.replace(/ /g, '%20') : Constants.DEFAULT_SERVER_IMG,
+      url: isValidUrl(body.url) ? body.url.replace(/ /g, '%20') : Constants.DEFAULT_SERVER_URL,
+      notes: {},
+      switches: {},
+      alarms: {},
+      storageMonitors: {},
+      markers: {},
+      switchGroups: {},
+      messageId: null,
+      battlemetricsId: null,
+      connect: null,
+      cargoShipEgressTimeMs: Constants.DEFAULT_CARGO_SHIP_EGRESS_TIME_MS,
+      oilRigLockedCrateUnlockTimeMs: Constants.DEFAULT_OIL_RIG_LOCKED_CRATE_UNLOCK_TIME_MS,
+      timeTillDay: null,
+      timeTillNight: null
     };
-    client.setInstance(guild.id, instance);
+  } else {
+    // Update a few fields on re-pair
+    const s = instance.serverList[serverId];
+    s.title       = title || s.title;
+    s.serverIp    = ip;
+    s.appPort     = port;
+    s.steamId     = body.playerId ?? steamId;
+    s.playerToken = body.playerToken ?? s.playerToken ?? null;
+    s.description = (body.desc || s.description || '').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+    if (isValidUrl(body.img)) s.img = body.img.replace(/ /g, '%20');
+    if (isValidUrl(body.url)) s.url = body.url.replace(/ /g, '%20');
+  }
+  // --- /NEW ---
 
-    const rustplus = client.rustplusInstances[guild.id];
-    if (rustplus && (rustplus.serverId === serverId) && rustplus.team.leaderSteamId === steamId) {
-        rustplus.updateLeaderRustPlusLiteInstance();
-    }
+
+  instance.serverListLite[serverId][steamId] = {
+    serverIp: ip,
+    appPort: port,
+    steamId: body.playerId ?? steamId,
+    playerToken: body.playerToken ?? null,
+  };
+  client.setInstance(guild.id, instance);
+
+    // --- NEW: post/create the #servers widget for this server ---
+  try {
+    await DiscordMessages.sendServerMessage(guild.id, serverId, null);
+  } catch (err) {
+    console.error('[FCM LITE] sendServerMessage failed:', err?.message || err);
+  }
+  // --- /NEW ---
+
+
+  const rustplus = client.rustplusInstances[guild.id];
+  if (
+    rustplus &&
+    rustplus.serverId === serverId &&
+    rustplus.team &&                       // <-- guard
+    rustplus.team.leaderSteamId === steamId
+  ) {
+    rustplus.updateLeaderRustPlusLiteInstance();
+  }
 }
 
 async function pairingEntitySwitch(client, guild, title, message, body) {
@@ -204,9 +307,10 @@ async function pairingEntitySwitch(client, guild, title, message, body) {
 
     const rustplus = client.rustplusInstances[guild.id];
     if (rustplus && serverId === rustplus.serverId) {
-        const info = await rustplus.getEntityInfoAsync(body.entityId);
-        if (!(await rustplus.isResponseValid(info))) {
-            instance.serverList[serverId].switches[body.entityId].reachable = false;
+      const info = await rustplus.getEntityInfoAsync(body.entityId);
+        if (!(await rustplus.isResponseValid(info)) || !info?.entityInfo?.payload) {
+          // response invalid or missing payload -> mark unreachable and skip payload-dependent work
+          instance.serverList[serverId].switches[body.entityId].reachable = false;
         }
 
         const teamInfo = await rustplus.getTeamInfoAsync();
@@ -220,9 +324,10 @@ async function pairingEntitySwitch(client, guild, title, message, body) {
             }
         }
 
-        if (instance.serverList[serverId].switches[body.entityId].reachable) {
-            instance.serverList[serverId].switches[body.entityId].active = info.entityInfo.payload.value;
-        }
+    // Only update 'active' when we have a valid payload
+    if (instance.serverList[serverId].switches[body.entityId].reachable && info?.entityInfo?.payload) {
+      instance.serverList[serverId].switches[body.entityId].active = info.entityInfo.payload.value;
+    }
         client.setInstance(guild.id, instance);
 
         await DiscordMessages.sendSmartSwitchMessage(guild.id, serverId, body.entityId);
@@ -254,9 +359,10 @@ async function pairingEntitySmartAlarm(client, guild, title, message, body) {
 
     const rustplus = client.rustplusInstances[guild.id];
     if (rustplus && serverId === rustplus.serverId) {
-        const info = await rustplus.getEntityInfoAsync(body.entityId);
-        if (!(await rustplus.isResponseValid(info))) {
-            instance.serverList[serverId].alarms[body.entityId].reachable = false;
+      const info = await rustplus.getEntityInfoAsync(body.entityId);
+        if (!(await rustplus.isResponseValid(info)) || !info?.entityInfo?.payload) {
+          // invalid response or missing payload -> mark unreachable
+          instance.serverList[serverId].alarms[body.entityId].reachable = false;
         }
 
         const teamInfo = await rustplus.getTeamInfoAsync();
@@ -268,9 +374,10 @@ async function pairingEntitySmartAlarm(client, guild, title, message, body) {
             }
         }
 
-        if (instance.serverList[serverId].alarms[body.entityId].reachable) {
-            instance.serverList[serverId].alarms[body.entityId].active = info.entityInfo.payload.value;
-        }
+    // Only update 'active' when we have a valid payload
+    if (instance.serverList[serverId].alarms[body.entityId].reachable && info?.entityInfo?.payload) {
+      instance.serverList[serverId].alarms[body.entityId].active = info.entityInfo.payload.value;
+    }
         client.setInstance(guild.id, instance);
     }
 
@@ -302,9 +409,10 @@ async function pairingEntityStorageMonitor(client, guild, title, message, body) 
 
     const rustplus = client.rustplusInstances[guild.id];
     if (rustplus && serverId === rustplus.serverId) {
-        const info = await rustplus.getEntityInfoAsync(body.entityId);
-        if (!(await rustplus.isResponseValid(info))) {
-            instance.serverList[serverId].storageMonitors[body.entityId].reachable = false;
+      const info = await rustplus.getEntityInfoAsync(body.entityId);
+        if (!(await rustplus.isResponseValid(info)) || !info?.entityInfo?.payload) {
+          // invalid response or missing payload -> mark unreachable
+          instance.serverList[serverId].storageMonitors[body.entityId].reachable = false;
         }
 
         const teamInfo = await rustplus.getTeamInfoAsync();
@@ -316,34 +424,66 @@ async function pairingEntityStorageMonitor(client, guild, title, message, body) 
             }
         }
 
-        if (instance.serverList[serverId].storageMonitors[body.entityId].reachable) {
-            if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_TOOL_CUPBOARD_CAPACITY) {
-                instance.serverList[serverId].storageMonitors[body.entityId].type = 'toolCupboard';
-                instance.serverList[serverId].storageMonitors[body.entityId].image = 'tool_cupboard.png';
-                if (info.entityInfo.payload.protectionExpiry === 0) {
-                    instance.serverList[serverId].storageMonitors[body.entityId].decaying = true;
-                }
-            }
-            else if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_VENDING_MACHINE_CAPACITY) {
-                instance.serverList[serverId].storageMonitors[body.entityId].type = 'vendingMachine';
-                instance.serverList[serverId].storageMonitors[body.entityId].image = 'vending_machine.png';
-            }
-            else if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_LARGE_WOOD_BOX_CAPACITY) {
-                instance.serverList[serverId].storageMonitors[body.entityId].type = 'largeWoodBox';
-                instance.serverList[serverId].storageMonitors[body.entityId].image = 'large_wood_box.png';
-            }
-
-            rustplus.storageMonitors[body.entityId] = {
-                items: info.entityInfo.payload.items,
-                expiry: info.entityInfo.payload.protectionExpiry,
-                capacity: info.entityInfo.payload.capacity,
-                hasProtection: info.entityInfo.payload.hasProtection
-            }
+    // Only operate on payload when reachable and payload exists
+    if (instance.serverList[serverId].storageMonitors[body.entityId].reachable && info?.entityInfo?.payload) {
+      if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_TOOL_CUPBOARD_CAPACITY) {
+        instance.serverList[serverId].storageMonitors[body.entityId].type = 'toolCupboard';
+        instance.serverList[serverId].storageMonitors[body.entityId].image = 'tool_cupboard.png';
+        if (info.entityInfo.payload.protectionExpiry === 0) {
+          instance.serverList[serverId].storageMonitors[body.entityId].decaying = true;
         }
+      }
+      else if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_VENDING_MACHINE_CAPACITY) {
+        instance.serverList[serverId].storageMonitors[body.entityId].type = 'vendingMachine';
+        instance.serverList[serverId].storageMonitors[body.entityId].image = 'vending_machine.png';
+      }
+      else if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_LARGE_WOOD_BOX_CAPACITY) {
+        instance.serverList[serverId].storageMonitors[body.entityId].type = 'largeWoodBox';
+        instance.serverList[serverId].storageMonitors[body.entityId].image = 'large_wood_box.png';
+      }
+
+      rustplus.storageMonitors[body.entityId] = {
+        items: info.entityInfo.payload.items,
+        expiry: info.entityInfo.payload.protectionExpiry,
+        capacity: info.entityInfo.payload.capacity,
+        hasProtection: info.entityInfo.payload.hasProtection
+      }
+    }
         client.setInstance(guild.id, instance);
 
         await DiscordMessages.sendStorageMonitorMessage(guild.id, serverId, body.entityId);
     }
+}
+
+// Alarm handler for FCM Lite (minimal parity with host alarm handling)
+async function alarmAlarmLite(client, guild, title, message, body) {
+  const instance = client.getInstance(guild.id);
+  const serverId = `${body.ip}-${body.port}`;
+  const entityId = body.entityId;
+  const server   = instance.serverList[serverId];
+  const rustplus = client.rustplusInstances[guild.id];
+
+  if (!server || !server.alarms || !server.alarms[entityId]) return;
+
+  const alarm = server.alarms[entityId];
+
+  const notConnectedToThisServer = (!rustplus || rustplus.serverId !== serverId);
+  if (notConnectedToThisServer && instance.generalSettings.fcmAlarmNotificationEnabled) {
+    // Record trigger time
+    alarm.lastTrigger = Math.floor(Date.now() / 1000);
+    client.setInstance(guild.id, instance);
+
+    // Post to Discord only if this alarm's notifications are ON
+    if (alarm.notify !== false) {
+      try {
+        await DiscordMessages.sendSmartAlarmTriggerMessage(guild.id, serverId, entityId);
+      } catch (err) {
+        client.log('WARN', `FCM LITE: sendSmartAlarmTriggerMessage failed: ${err?.message || err}`);
+      }
+    }
+
+    client.log('FCM LITE', `${title}: ${message}`);
+  }
 }
 
 async function playerDeath(client, guild, title, message, body, discordUserId) {

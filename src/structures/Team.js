@@ -18,7 +18,7 @@
 
 */
 
-const Client = require('../../index.ts');
+const getClient = require('../util/getClient');
 const Player = require('./Player.js');
 
 class Team {
@@ -53,7 +53,7 @@ class Team {
     isLeaderSteamIdChanged(team) { return (this.leaderSteamId !== team.leaderSteamId.toString()); }
 
     updateTeam(team) {
-        const instance = Client.client.getInstance(this.rustplus.guildId);
+        const instance = getClient().getInstance(this.rustplus.guildId);
 
         if (this.isLeaderSteamIdChanged(team)) {
             let player = this.getPlayer(this.leaderSteamId);
@@ -63,8 +63,8 @@ class Team {
 
             player = this.getPlayer(team.leaderSteamId.toString());
             if (player !== null) {
-                this.rustplus.log(Client.client.intlGet(null, 'commandCap'),
-                    Client.client.intlGet(null, 'leaderTransferred', {
+                this.rustplus.log(getClient().intlGet(null, 'commandCap'),
+                    getClient().intlGet(null, 'leaderTransferred', {
                         name: `${player.name}:${player.steamId}`
                     }));
             }
@@ -114,7 +114,7 @@ class Team {
             player.teamLeader = true;
         }
 
-        Client.client.setInstance(this.rustplus.guildId, instance);
+        getClient().setInstance(this.rustplus.guildId, instance);
     }
 
     addPlayer(player) {

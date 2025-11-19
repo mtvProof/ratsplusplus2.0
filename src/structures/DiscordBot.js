@@ -38,6 +38,17 @@ const RustPlus = require('../structures/RustPlus');
 class DiscordBot extends Discord.Client {
     constructor(props) {
         super(props);
+// AFTER line 43 in constructor(props)
+process.removeAllListeners?.('unhandledRejection');
+process.removeAllListeners?.('uncaughtException');
+
+process.on('unhandledRejection', (reason) => {
+  try { this.log(this.intlGet(null, 'errorCap'), `UnhandledRejection: ${reason?.stack || reason}`, 'error'); } catch {}
+});
+
+process.on('uncaughtException', (err) => {
+  try { this.log(this.intlGet(null, 'errorCap'), `UncaughtException: ${err?.stack || err}`, 'error'); } catch {}
+});
 
         this.logger = new Logger(Path.join(__dirname, '..', '..', 'logs/discordBot.log'), 'default');
 
@@ -474,17 +485,26 @@ class DiscordBot extends Discord.Client {
         return undefined;
     }
 
-    async interactionUpdate(interaction, content) {
-        try {
-            return await interaction.update(content);
-        }
-        catch (e) {
-            this.log(this.intlGet(null, 'errorCap'),
-                this.intlGet(null, 'interactionUpdateFailed', { error: e }), 'error');
-        }
-
-        return undefined;
+async interactionUpdate(interaction, content) {
+  try {
+    if (!interaction.deferred && !interaction.replied) {
+      return await interaction.update(content);
     }
+  } catch (_) { /* fall through */ }
+
+  try {
+    return await interaction.message.edit(content);
+  } catch (e) {
+    this.log(
+      this.intlGet(null, 'errorCap'),
+      this.intlGet(null, 'interactionUpdateFailed', { error: e }),
+      'error'
+    );
+    return undefined;
+  }
+}
+
+
 
     async messageEdit(message, content) {
         try {

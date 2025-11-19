@@ -20,7 +20,7 @@
 
 const Axios = require('axios');
 
-const Client = require('../../index.ts');
+const getClient = require('../util/getClient');
 const RandomUsernames = require('../staticFiles/RandomUsernames.json');
 const Utils = require = require('../util/utils.js');
 
@@ -384,8 +384,8 @@ class Battlemetrics {
         const response = await this.#request(api_call);
 
         if (response.status !== 200) {
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'battlemetricsApiRequestFailed', { api_call: api_call }), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'battlemetricsApiRequestFailed', { api_call: api_call }), 'error');
             return null;
         }
 
@@ -399,8 +399,8 @@ class Battlemetrics {
      */
     async setup() {
         if (this.id === null && this.name === null) {
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'battlemetricsIdAndNameMissing'), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'battlemetricsIdAndNameMissing'), 'error');
             return;
         }
 
@@ -443,8 +443,8 @@ class Battlemetrics {
         const response = await this.#request(search);
 
         if (response.status !== 200) {
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'battlemetricsApiRequestFailed', { api_call: search }), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'battlemetricsApiRequestFailed', { api_call: search }), 'error');
             return null;
         }
 
@@ -484,8 +484,8 @@ class Battlemetrics {
 
         if (!data) {
             this.lastUpdateSuccessful = false;
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'battlemetricsFailedToUpdate', { server: this.id }), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'battlemetricsFailedToUpdate', { server: this.id }), 'error');
             return false;
         }
 

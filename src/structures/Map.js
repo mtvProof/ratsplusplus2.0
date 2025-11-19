@@ -24,13 +24,13 @@ const Jimp = require('jimp');
 const Path = require('path');
 
 const Constants = require('../util/constants.js');
-const Client = require('../../index.ts');
+const getClient = require('../util/getClient');
 
 class Map {
     constructor(map, rustplus) {
         this._width = map.width;
         this._height = map.height;
-        Client.client.rustplusMaps[rustplus.guildId] = map.jpgImage;
+        getClient().rustplusMaps[rustplus.guildId] = map.jpgImage;
         this._oceanMargin = map.oceanMargin;
         this._monuments = map.monuments;
         this._background = map.background;
@@ -81,158 +81,158 @@ class Map {
 
         this._monumentInfo = {
             AbandonedMilitaryBase: {
-                clean: Client.client.intlGet(rustplus.guildId, 'abandonedMilitaryBase'),
-                map: Client.client.intlGet(rustplus.guildId, 'abandonedMilitaryBase').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'abandonedMilitaryBase'),
+                map: getClient().intlGet(rustplus.guildId, 'abandonedMilitaryBase').toUpperCase(),
                 radius: 46
             },
             airfield_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'airfield'),
-                map: Client.client.intlGet(rustplus.guildId, 'airfield').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'airfield'),
+                map: getClient().intlGet(rustplus.guildId, 'airfield').toUpperCase(),
                 radius: 120
             },
             arctic_base_a: {
-                clean: Client.client.intlGet(rustplus.guildId, 'arcticResearchBase'),
-                map: Client.client.intlGet(rustplus.guildId, 'arcticResearchBase').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'arcticResearchBase'),
+                map: getClient().intlGet(rustplus.guildId, 'arcticResearchBase').toUpperCase(),
                 radius: 64
             },
             bandit_camp: {
-                clean: Client.client.intlGet(rustplus.guildId, 'banditCamp'),
-                map: Client.client.intlGet(rustplus.guildId, 'banditCamp').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'banditCamp'),
+                map: getClient().intlGet(rustplus.guildId, 'banditCamp').toUpperCase(),
                 radius: 82
             },
             dome_monument_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'theDome'),
-                map: Client.client.intlGet(rustplus.guildId, 'theDome').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'theDome'),
+                map: getClient().intlGet(rustplus.guildId, 'theDome').toUpperCase(),
                 radius: 50
             },
             excavator: {
-                clean: Client.client.intlGet(rustplus.guildId, 'giantExcavatorPit'),
-                map: Client.client.intlGet(rustplus.guildId, 'giantExcavatorPit').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'giantExcavatorPit'),
+                map: getClient().intlGet(rustplus.guildId, 'giantExcavatorPit').toUpperCase(),
                 radius: 110
             },
             ferryterminal: {
-                clean: Client.client.intlGet(rustplus.guildId, 'ferryTerminal'),
-                map: Client.client.intlGet(rustplus.guildId, 'ferryTerminal').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'ferryTerminal'),
+                map: getClient().intlGet(rustplus.guildId, 'ferryTerminal').toUpperCase(),
                 radius: 88
             },
             fishing_village_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'fishingVillage'),
-                map: Client.client.intlGet(rustplus.guildId, 'fishingVillage').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'fishingVillage'),
+                map: getClient().intlGet(rustplus.guildId, 'fishingVillage').toUpperCase(),
                 radius: 31
             },
             gas_station: {
-                clean: Client.client.intlGet(rustplus.guildId, 'oxumsGasStation'),
-                map: Client.client.intlGet(rustplus.guildId, 'oxumsGasStation').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'oxumsGasStation'),
+                map: getClient().intlGet(rustplus.guildId, 'oxumsGasStation').toUpperCase(),
                 radius: 28
             },
             harbor_2_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'harbor'),
-                map: Client.client.intlGet(rustplus.guildId, 'harbor').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'harbor'),
+                map: getClient().intlGet(rustplus.guildId, 'harbor').toUpperCase(),
                 radius: 96
             },
             harbor_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'harbor'),
-                map: Client.client.intlGet(rustplus.guildId, 'harbor').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'harbor'),
+                map: getClient().intlGet(rustplus.guildId, 'harbor').toUpperCase(),
                 radius: 96
             },
             junkyard_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'junkyard'),
-                map: Client.client.intlGet(rustplus.guildId, 'junkyard').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'junkyard'),
+                map: getClient().intlGet(rustplus.guildId, 'junkyard').toUpperCase(),
                 radius: 88
             },
             large_fishing_village_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'largeFishingVillage'),
-                map: Client.client.intlGet(rustplus.guildId, 'largeFishingVillage').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'largeFishingVillage'),
+                map: getClient().intlGet(rustplus.guildId, 'largeFishingVillage').toUpperCase(),
                 radius: 40
             },
             large_oil_rig: {
-                clean: Client.client.intlGet(rustplus.guildId, 'largeOilRig'),
-                map: Client.client.intlGet(rustplus.guildId, 'largeOilRig').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'largeOilRig'),
+                map: getClient().intlGet(rustplus.guildId, 'largeOilRig').toUpperCase(),
                 radius: 40
             },
             launchsite: {
-                clean: Client.client.intlGet(rustplus.guildId, 'launchSite'),
-                map: Client.client.intlGet(rustplus.guildId, 'launchSite').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'launchSite'),
+                map: getClient().intlGet(rustplus.guildId, 'launchSite').toUpperCase(),
                 radius: 250
             },
             lighthouse_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'lighthouse'),
-                map: Client.client.intlGet(rustplus.guildId, 'lighthouse').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'lighthouse'),
+                map: getClient().intlGet(rustplus.guildId, 'lighthouse').toUpperCase(),
                 radius: 28
             },
             military_tunnels_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'militaryTunnel'),
-                map: Client.client.intlGet(rustplus.guildId, 'militaryTunnel').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'militaryTunnel'),
+                map: getClient().intlGet(rustplus.guildId, 'militaryTunnel').toUpperCase(),
                 radius: 122
             },
             mining_outpost_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'miningOutpost'),
-                map: Client.client.intlGet(rustplus.guildId, 'miningOutpost').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'miningOutpost'),
+                map: getClient().intlGet(rustplus.guildId, 'miningOutpost').toUpperCase(),
                 radius: 17
             },
             missile_silo_monument: {
-                clean: Client.client.intlGet(rustplus.guildId, 'missileSilo'),
-                map: Client.client.intlGet(rustplus.guildId, 'missileSilo').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'missileSilo'),
+                map: getClient().intlGet(rustplus.guildId, 'missileSilo').toUpperCase(),
                 radius: 81
             },
             mining_quarry_hqm_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'hqmQuarry'),
-                map: Client.client.intlGet(rustplus.guildId, 'hqmQuarry').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'hqmQuarry'),
+                map: getClient().intlGet(rustplus.guildId, 'hqmQuarry').toUpperCase(),
                 radius: 27
             },
             mining_quarry_stone_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'stoneQuarry'),
-                map: Client.client.intlGet(rustplus.guildId, 'stoneQuarry').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'stoneQuarry'),
+                map: getClient().intlGet(rustplus.guildId, 'stoneQuarry').toUpperCase(),
                 radius: 35
             },
             mining_quarry_sulfur_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'sulfurQuarry'),
-                map: Client.client.intlGet(rustplus.guildId, 'sulfurQuarry').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'sulfurQuarry'),
+                map: getClient().intlGet(rustplus.guildId, 'sulfurQuarry').toUpperCase(),
                 radius: 33
             },
             oil_rig_small: {
-                clean: Client.client.intlGet(rustplus.guildId, 'oilRig'),
-                map: Client.client.intlGet(rustplus.guildId, 'oilRig').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'oilRig'),
+                map: getClient().intlGet(rustplus.guildId, 'oilRig').toUpperCase(),
                 radius: 32
             },
             outpost: {
-                clean: Client.client.intlGet(rustplus.guildId, 'outpost'),
-                map: Client.client.intlGet(rustplus.guildId, 'outpost').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'outpost'),
+                map: getClient().intlGet(rustplus.guildId, 'outpost').toUpperCase(),
                 radius: 81
             },
             power_plant_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'powerPlant'),
-                map: Client.client.intlGet(rustplus.guildId, 'powerPlant').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'powerPlant'),
+                map: getClient().intlGet(rustplus.guildId, 'powerPlant').toUpperCase(),
                 radius: 112
             },
             satellite_dish_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'satelliteDish'),
-                map: Client.client.intlGet(rustplus.guildId, 'satelliteDish').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'satelliteDish'),
+                map: getClient().intlGet(rustplus.guildId, 'satelliteDish').toUpperCase(),
                 radius: 78
             },
             sewer_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'sewerBranch'),
-                map: Client.client.intlGet(rustplus.guildId, 'sewerBranch').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'sewerBranch'),
+                map: getClient().intlGet(rustplus.guildId, 'sewerBranch').toUpperCase(),
                 radius: 87
             },
             stables_a: {
-                clean: Client.client.intlGet(rustplus.guildId, 'ranch'),
-                map: Client.client.intlGet(rustplus.guildId, 'ranch').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'ranch'),
+                map: getClient().intlGet(rustplus.guildId, 'ranch').toUpperCase(),
                 radius: 35
             },
             stables_b: {
-                clean: Client.client.intlGet(rustplus.guildId, 'largeBarn'),
-                map: Client.client.intlGet(rustplus.guildId, 'largeBarn').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'largeBarn'),
+                map: getClient().intlGet(rustplus.guildId, 'largeBarn').toUpperCase(),
                 radius: 35
             },
             supermarket: {
-                clean: Client.client.intlGet(rustplus.guildId, 'abandonedSupermarket'),
-                map: Client.client.intlGet(rustplus.guildId, 'abandonedSupermarket').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'abandonedSupermarket'),
+                map: getClient().intlGet(rustplus.guildId, 'abandonedSupermarket').toUpperCase(),
                 radius: 19
             },
             swamp_c: {
-                clean: Client.client.intlGet(rustplus.guildId, 'abandonedCabins'),
-                map: Client.client.intlGet(rustplus.guildId, 'abandonedCabins').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'abandonedCabins'),
+                map: getClient().intlGet(rustplus.guildId, 'abandonedCabins').toUpperCase(),
                 radius: 42
             },
             train_tunnel_display_name: {
@@ -246,18 +246,18 @@ class Map {
                 radius: 0
             },
             train_yard_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'trainYard'),
-                map: Client.client.intlGet(rustplus.guildId, 'trainYard').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'trainYard'),
+                map: getClient().intlGet(rustplus.guildId, 'trainYard').toUpperCase(),
                 radius: 115
             },
             underwater_lab: {
-                clean: Client.client.intlGet(rustplus.guildId, 'underwaterLab'),
-                map: Client.client.intlGet(rustplus.guildId, 'underwaterLab').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'underwaterLab'),
+                map: getClient().intlGet(rustplus.guildId, 'underwaterLab').toUpperCase(),
                 radius: 75
             },
             water_treatment_plant_display_name: {
-                clean: Client.client.intlGet(rustplus.guildId, 'waterTreatmentPlant'),
-                map: Client.client.intlGet(rustplus.guildId, 'waterTreatmentPlant').toUpperCase(),
+                clean: getClient().intlGet(rustplus.guildId, 'waterTreatmentPlant'),
+                map: getClient().intlGet(rustplus.guildId, 'waterTreatmentPlant').toUpperCase(),
                 radius: 110
             }
         }
@@ -295,7 +295,7 @@ class Map {
     updateMap(map) {
         this.width = map.width;
         this.height = map.height;
-        Client.client.rustplusMaps[this.rustplus.guildId] = map.jpgImage;
+        getClient().rustplusMaps[this.rustplus.guildId] = map.jpgImage;
         this.oceanMargin = map.oceanMargin;
         this.monuments = map.monuments;
         this.background = map.background;
@@ -310,7 +310,7 @@ class Map {
     }
 
     async writeMapClean() {
-        await Fs.writeFileSync(this.mapMarkerImageMeta.map.image, Client.client.rustplusMaps[this.rustplus.guildId]);
+        await Fs.writeFileSync(this.mapMarkerImageMeta.map.image, getClient().rustplusMaps[this.rustplus.guildId]);
     }
 
     async setupFont() {
@@ -335,8 +335,8 @@ class Map {
 
     async mapAppendMonuments() {
         if (this.rustplus.info === null) {
-            this.rustplus.log(Client.client.intlGet(null, 'warningCap'),
-                Client.client.intlGet(null, 'couldNotAppendMapMonuments'));
+            this.rustplus.log(getClient().intlGet(null, 'warningCap'),
+                getClient().intlGet(null, 'couldNotAppendMapMonuments'));
             return;
         }
 
@@ -377,8 +377,8 @@ class Map {
 
     async mapAppendMarkers() {
         if (this.rustplus.info === null) {
-            this.rustplus.log(Client.client.intlGet(null, 'warningCap'),
-                Client.client.intlGet(null, 'couldNotAppendMapMarkers'));
+            this.rustplus.log(getClient().intlGet(null, 'warningCap'),
+                getClient().intlGet(null, 'couldNotAppendMapMarkers'));
             return;
         }
 
@@ -430,8 +430,8 @@ class Map {
             const image = Gm(this.mapMarkerImageMeta.map.image.replace('clean.png', 'full.png'));
 
             if (this.rustplus.info === null) {
-                this.rustplus.log(Client.client.intlGet(null, 'warningCap'),
-                    Client.client.intlGet(null, 'couldNotAppendMapTracers'));
+                this.rustplus.log(getClient().intlGet(null, 'warningCap'),
+                    getClient().intlGet(null, 'couldNotAppendMapTracers'));
                 return;
             }
 
@@ -472,8 +472,8 @@ class Map {
             await this.gmWriteAsync(image, this.mapMarkerImageMeta.map.image.replace('clean.png', 'full.png'));
         }
         catch (error) {
-            this.rustplus.log(Client.client.intlGet(null, 'warningCap'),
-                Client.client.intlGet(null, 'couldNotAddStepTracers'));
+            this.rustplus.log(getClient().intlGet(null, 'warningCap'),
+                getClient().intlGet(null, 'couldNotAddStepTracers'));
         }
     }
 

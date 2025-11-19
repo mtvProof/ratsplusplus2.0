@@ -20,16 +20,16 @@
 
 const Discord = require('discord.js');
 
-const Client = require('../../index.ts');
+const getClient = require('../util/getClient');
 
 module.exports = {
     getGuild: function (guildId) {
         try {
-            return Client.client.guilds.cache.get(guildId);
+            return getClient().guilds.cache.get(guildId);
         }
         catch (e) {
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'couldNotFindGuild', { guildId: guildId }), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'couldNotFindGuild', { guildId: guildId }), 'error');
         }
         return undefined;
     },
@@ -42,8 +42,8 @@ module.exports = {
                 return guild.roles.cache.get(roleId);
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotFindRole', { roleId: roleId }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotFindRole', { roleId: roleId }), 'error');
             }
         }
         return undefined;
@@ -59,8 +59,8 @@ module.exports = {
                 return user;
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotFindUser', { userId: userId }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotFindUser', { userId: userId }), 'error');
             }
         }
         return undefined;
@@ -75,8 +75,8 @@ module.exports = {
                 channel = guild.channels.cache.get(channelId);
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotFindChannel', { channel: channelId }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotFindChannel', { channel: channelId }), 'error');
             }
 
             if (channel && channel.type === Discord.ChannelType.GuildText) {
@@ -95,8 +95,8 @@ module.exports = {
                 channel = guild.channels.cache.find(c => c.name === name);
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotFindChannel', { channel: name }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotFindChannel', { channel: name }), 'error');
             }
 
             if (channel && channel.type === Discord.ChannelType.GuildText) {
@@ -115,8 +115,8 @@ module.exports = {
                 category = guild.channels.cache.get(categoryId);
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotFindCategory', { category: categoryId }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotFindCategory', { category: categoryId }), 'error');
             }
 
             if (category && category.type === Discord.ChannelType.GuildCategory) {
@@ -135,8 +135,8 @@ module.exports = {
                 category = guild.channels.cache.find(c => c.name === name);
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotFindCategory', { category: name }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotFindCategory', { category: name }), 'error');
             }
 
             if (category && category.type === Discord.ChannelType.GuildCategory) {
@@ -159,8 +159,8 @@ module.exports = {
                     return message;
                 }
                 catch (e) {
-                    Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                        Client.client.intlGet(null, 'couldNotFindMessage', { message: messageId }), 'error');
+                    getClient().log(getClient().intlGet(null, 'errorCap'),
+                        getClient().intlGet(null, 'couldNotFindMessage', { message: messageId }), 'error');
                 }
             }
         }
@@ -174,8 +174,8 @@ module.exports = {
             await message.delete();
         }
         catch (e) {
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'couldNotDeleteMessage', { message: messageId }), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'couldNotDeleteMessage', { message: messageId }), 'error');
 
         }
         return undefined;
@@ -196,8 +196,8 @@ module.exports = {
                 });
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotCreateCategory', { name: name }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotCreateCategory', { name: name }), 'error');
             }
         }
         return undefined;
@@ -210,8 +210,8 @@ module.exports = {
             await category.delete();
         }
         catch (e) {
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'couldNotDeleteCategory', { categoryId: categoryId }), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'couldNotDeleteCategory', { categoryId: categoryId }), 'error');
             return false;
         }
         return true;
@@ -232,8 +232,8 @@ module.exports = {
                 });
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotCreateTextChannel', { name: name }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotCreateTextChannel', { name: name }), 'error');
             }
         }
         return undefined;
@@ -246,8 +246,8 @@ module.exports = {
             await channel.delete();
         }
         catch (e) {
-            Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                Client.client.intlGet(null, 'couldNotDeleteChannel', { channelId: channelId }), 'error');
+            getClient().log(getClient().intlGet(null, 'errorCap'),
+                getClient().intlGet(null, 'couldNotDeleteChannel', { channelId: channelId }), 'error');
             return false;
         }
         return true;
@@ -267,8 +267,8 @@ module.exports = {
                     }
                 }
                 catch (e) {
-                    Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                        Client.client.intlGet(null, 'couldNotPerformBulkDelete', { channel: channelId }), 'error');
+                    getClient().log(getClient().intlGet(null, 'errorCap'),
+                        getClient().intlGet(null, 'couldNotPerformBulkDelete', { channel: channelId }), 'error');
                 }
             }
 
@@ -278,8 +278,8 @@ module.exports = {
                 messages = await channel.messages.fetch({ limit: 100 });
             }
             catch (e) {
-                Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                    Client.client.intlGet(null, 'couldNotPerformMessagesFetch', { channel: channelId }), 'error');
+                getClient().log(getClient().intlGet(null, 'errorCap'),
+                    getClient().intlGet(null, 'couldNotPerformMessagesFetch', { channel: channelId }), 'error');
             }
 
             if (Object.keys(messages).length === 0) {
@@ -296,8 +296,8 @@ module.exports = {
                     await message.delete();
                 }
                 catch (e) {
-                    Client.client.log(Client.client.intlGet(null, 'errorCap'),
-                        Client.client.intlGet(null, 'couldNotPerformMessageDelete'), 'error');
+                    getClient().log(getClient().intlGet(null, 'errorCap'),
+                        getClient().intlGet(null, 'couldNotPerformMessageDelete'), 'error');
                 }
             }
         }

@@ -159,7 +159,16 @@ async function messageBroadcastEntityChangedSmartSwitch(rustplus, client, messag
         delete rustplus.currentSwitchTimeouts[entityId];
     }
 
-    const active = message.broadcast.entityChanged.payload.value;
+    // Guard: payload may be missing in some broadcasts
+    const payload = message.broadcast.entityChanged.payload;
+    if (!payload) {
+        // Mark unreachable and persist
+        server.switches[entityId].reachable = false;
+        client.setInstance(rustplus.guildId, instance);
+        return;
+    }
+
+    const active = payload.value;
     server.switches[entityId].active = active;
     client.setInstance(rustplus.guildId, instance);
 
@@ -169,29 +178,52 @@ async function messageBroadcastEntityChangedSmartSwitch(rustplus, client, messag
 }
 
 async function messageBroadcastEntityChangedSmartAlarm(rustplus, client, message) {
-    const instance = client.getInstance(rustplus.guildId);
-    const serverId = rustplus.serverId;
-    const entityId = message.broadcast.entityChanged.entityId;
-    const server = instance.serverList[serverId];
+  const instance = client.getInstance(rustplus.guildId);
+  const serverId = rustplus.serverId;
+  const entityId = message.broadcast.entityChanged.entityId;
+  const server = instance.serverList[serverId];
 
-    if (!server || (server && !server.alarms[entityId])) return;
-
-    const active = message.broadcast.entityChanged.payload.value;
-    server.alarms[entityId].active = active;
-    server.alarms[entityId].reachable = true;
-    client.setInstance(rustplus.guildId, instance);
-
-    if (active) {
-        server.alarms[entityId].lastTrigger = Math.floor(new Date() / 1000);
-        client.setInstance(rustplus.guildId, instance);
-        await DiscordMessages.sendSmartAlarmTriggerMessage(rustplus.guildId, serverId, entityId);
-
-        if (instance.generalSettings.smartAlarmNotifyInGame) {
-            rustplus.sendInGameMessage(`${server.alarms[entityId].name}: ${server.alarms[entityId].message}`);
-        }
+    // Debug: log raw alarm broadcast for troubleshooting (will help confirm receipt)
+    try {
+        client.log('DEBUG', `alarm broadcast received: ${JSON.stringify(message.broadcast.entityChanged)}`);
+    } catch (e) {
+        client.log('DEBUG', 'alarm broadcast received (stringify failed)');
     }
 
-    DiscordMessages.sendSmartAlarmMessage(rustplus.guildId, rustplus.serverId, entityId);
+    if (!server || !server.alarms[entityId]) return;
+
+    const alarm  = server.alarms[entityId];            // <— grab the alarm once
+
+        // Guard: payload may be missing in some broadcasts
+        const payload = message.broadcast.entityChanged.payload;
+        if (!payload) {
+                // Mark alarm as unreachable and persist
+                alarm.reachable = false;
+                client.setInstance(rustplus.guildId, instance);
+                return;
+        }
+
+        const active = payload.value;
+  alarm.active = active;
+  alarm.reachable = true;
+  client.setInstance(rustplus.guildId, instance);
+
+  if (active) {
+    alarm.lastTrigger = Math.floor(Date.now() / 1000);
+    client.setInstance(rustplus.guildId, instance);
+
+    // (Optional but safe) Only send the Discord alert if the alarm's notifs are ON
+    if (alarm.notify !== false) {
+      await DiscordMessages.sendSmartAlarmTriggerMessage(rustplus.guildId, serverId, entityId);
+    }
+
+    // NEW: gate the in-game message by the alarm's notify toggle + global in-game toggle
+    if (instance.generalSettings.smartAlarmNotifyInGame) {
+      rustplus.sendInGameMessage(`${alarm.name}: ${alarm.message}`);
+    }
+  }
+
+  DiscordMessages.sendSmartAlarmMessage(rustplus.guildId, rustplus.serverId, entityId);
 }
 
 async function messageBroadcastEntityChangedStorageMonitor(rustplus, client, message) {
@@ -202,28 +234,38 @@ async function messageBroadcastEntityChangedStorageMonitor(rustplus, client, mes
 
     if (!server || (server && !server.storageMonitors[entityId])) return;
 
-    if (message.broadcast.entityChanged.payload.value === true) return;
+    // Guard: payload may be missing in some broadcasts
+    const payload = message.broadcast.entityChanged.payload;
+    if (!payload) {
+        server.storageMonitors[entityId].reachable = false;
+        client.setInstance(rustplus.guildId, instance);
+        return;
+    }
+
+    if (payload.value === true) return;
 
     if (server.storageMonitors[entityId].type === 'toolCupboard' ||
-        message.broadcast.entityChanged.payload.capacity === Constants.STORAGE_MONITOR_TOOL_CUPBOARD_CAPACITY) {
+        payload.capacity === Constants.STORAGE_MONITOR_TOOL_CUPBOARD_CAPACITY) {
         setTimeout(updateToolCupboard.bind(null, rustplus, client, message), 2000);
     }
     else {
         rustplus.storageMonitors[entityId] = {
-            items: message.broadcast.entityChanged.payload.items,
-            expiry: message.broadcast.entityChanged.payload.protectionExpiry,
-            capacity: message.broadcast.entityChanged.payload.capacity,
-            hasProtection: message.broadcast.entityChanged.payload.hasProtection
+            items: payload.items,
+            expiry: payload.protectionExpiry,
+            capacity: payload.capacity,
+            hasProtection: payload.hasProtection
         }
 
         const info = await rustplus.getEntityInfoAsync(entityId);
-        server.storageMonitors[entityId].reachable = await rustplus.isResponseValid(info) ? true : false;
+        // ensure info contains payload before marking reachable
+        server.storageMonitors[entityId].reachable = (await rustplus.isResponseValid(info) && info?.entityInfo?.payload) ? true : false;
 
         if (server.storageMonitors[entityId].reachable) {
-            if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_VENDING_MACHINE_CAPACITY) {
+            const epayload = info.entityInfo.payload;
+            if (epayload.capacity === Constants.STORAGE_MONITOR_VENDING_MACHINE_CAPACITY) {
                 server.storageMonitors[entityId].type = 'vendingMachine';
             }
-            else if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_LARGE_WOOD_BOX_CAPACITY) {
+            else if (epayload.capacity === Constants.STORAGE_MONITOR_LARGE_WOOD_BOX_CAPACITY) {
                 server.storageMonitors[entityId].type = 'largeWoodBox';
             }
         }
@@ -239,20 +281,22 @@ async function updateToolCupboard(rustplus, client, message) {
     const entityId = message.broadcast.entityChanged.entityId;
 
     const info = await rustplus.getEntityInfoAsync(entityId);
-    server.storageMonitors[entityId].reachable = await rustplus.isResponseValid(info) ? true : false;
+    // ensure info contains payload before marking reachable
+    server.storageMonitors[entityId].reachable = (await rustplus.isResponseValid(info) && info?.entityInfo?.payload) ? true : false;
     client.setInstance(rustplus.guildId, instance);
 
     if (server.storageMonitors[entityId].reachable) {
+        const epayload = info.entityInfo.payload;
         rustplus.storageMonitors[entityId] = {
-            items: info.entityInfo.payload.items,
-            expiry: info.entityInfo.payload.protectionExpiry,
-            capacity: info.entityInfo.payload.capacity,
-            hasProtection: info.entityInfo.payload.hasProtection
+            items: epayload.items,
+            expiry: epayload.protectionExpiry,
+            capacity: epayload.capacity,
+            hasProtection: epayload.hasProtection
         }
 
         server.storageMonitors[entityId].type = 'toolCupboard';
 
-        if (info.entityInfo.payload.protectionExpiry === 0 && server.storageMonitors[entityId].decaying === false) {
+        if (epayload.protectionExpiry === 0 && server.storageMonitors[entityId].decaying === false) {
             server.storageMonitors[entityId].decaying = true;
 
             await DiscordMessages.sendDecayingNotificationMessage(rustplus.guildId, rustplus.serverId, entityId);
@@ -263,7 +307,7 @@ async function updateToolCupboard(rustplus, client, message) {
                 }));
             }
         }
-        else if (info.entityInfo.payload.protectionExpiry !== 0) {
+        else if (epayload.protectionExpiry !== 0) {
             server.storageMonitors[entityId].decaying = false;
         }
         client.setInstance(rustplus.guildId, instance);

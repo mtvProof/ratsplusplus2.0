@@ -43,8 +43,6 @@ module.exports = {
                         { name: client.intlGet(guildId, 'outpost'), value: 'Outpost' },
                         { name: client.intlGet(guildId, 'smallOilRig'), value: 'Small Oil Rig' },
                         { name: client.intlGet(guildId, 'underwaterLab'), value: 'Underwater Labs' },
-                        { name: client.intlGet(guildId, 'cargoship'), value: 'Cargo Ship' },
-                        { name: client.intlGet(guildId, 'ferryTerminal'), value: 'Ferry Terminal' },
                     ));
 
     },

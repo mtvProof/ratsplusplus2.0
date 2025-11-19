@@ -34,6 +34,13 @@ module.exports = async (client, guild, category) => {
     await addTextChannel(client.intlGet(guild.id, 'channelNameStorageMonitors'),
         'storageMonitors', client, guild, category);
     await addTextChannel(client.intlGet(guild.id, 'channelNameActivity'), 'activity', client, guild, category);
+ {
+   const key = 'channelNameImportantAlerts';
+   const value = client.intlGet(guild.id, key);
+   const name =
+     value && value !== key ? value : 'important-alerts'; // safe default
+   await addTextChannel(name, 'importantAlerts', client, guild, category);
+ }
     await addTextChannel(client.intlGet(guild.id, 'channelNameTrackers'), 'trackers', client, guild, category);
 };
 
@@ -41,8 +48,8 @@ async function addTextChannel(name, idName, client, guild, parent, permissionWri
     const instance = client.getInstance(guild.id);
 
     let channel = undefined;
-    if (instance.channelId[idName] !== null) {
-        channel = DiscordTools.getTextChannelById(guild.id, instance.channelId[idName]);
+    if (instance.channelId[idName]) {
+     channel = DiscordTools.getTextChannelById(guild.id, instance.channelId[idName]);
     }
     if (channel === undefined) {
         channel = await DiscordTools.addTextChannel(guild.id, name);

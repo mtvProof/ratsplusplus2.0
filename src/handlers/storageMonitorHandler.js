@@ -42,7 +42,11 @@ module.exports = {
                 instance = client.getInstance(guildId);
 
                 const info = await rustplus.getEntityInfoAsync(entityId);
-                if (!(await rustplus.isResponseValid(info))) {
+
+                // Guard against responses that are structurally missing expected data.
+                // Some responses may be considered "valid" by lower-level checks but still
+                // lack `entityInfo` or `entityInfo.payload`. Treat those as not found.
+                if (!(await rustplus.isResponseValid(info)) || !info || !info.entityInfo || !info.entityInfo.payload) {
                     if (instance.serverList[serverId].storageMonitors[entityId].reachable) {
                         await DiscordMessages.sendStorageMonitorNotFoundMessage(guildId, serverId, entityId);
                     }

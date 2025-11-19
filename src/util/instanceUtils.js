@@ -21,12 +21,12 @@
 const Fs = require('fs');
 const Path = require('path');
 
-const Client = require('../../index.ts');
+const getClient = require('../util/getClient');
 
 module.exports = {
     getSmartDevice: function (guildId, entityId) {
         /* Temporary function till discord modals gets more functional */
-        const instance = Client.client.getInstance(guildId);
+        const instance = getClient().getInstance(guildId);
 
         for (const serverId in instance.serverList) {
             for (const switchId in instance.serverList[serverId].switches) {

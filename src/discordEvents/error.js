@@ -21,7 +21,8 @@
 module.exports = {
     name: 'error',
     async execute(client, error) {
+        // Log, but DO NOT exit. Discord sometimes emits non-fatal errors.
         client.log(client.intlGet(null, 'errorCap'), error, 'error');
-        process.exit(1);
+        try { client.user?.setPresence({ status: 'idle' }); } catch {}
     },
 }

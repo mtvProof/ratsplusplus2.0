@@ -51,7 +51,9 @@ module.exports = (client, guild) => {
                 server: null,
                 event: null,
                 team: null,
-                battlemetricsPlayers: null
+                battlemetricsPlayers: null,
+                marketWatchlist: null
+
             },
             activeServer: null,
             serverList: {},
@@ -161,8 +163,12 @@ module.exports = (client, guild) => {
             if (!instance.informationMessageId.hasOwnProperty('server')) instance.informationMessageId.server = null;
             if (!instance.informationMessageId.hasOwnProperty('event')) instance.informationMessageId.event = null;
             if (!instance.informationMessageId.hasOwnProperty('team')) instance.informationMessageId.team = null;
-            if (!instance.informationMessageId.hasOwnProperty('team'))
+            if (!instance.informationMessageId.hasOwnProperty('battlemetricsPlayers'))
                 instance.informationMessageId.battlemetricsPlayers = null;
+
+            if (!instance.informationMessageId.hasOwnProperty('marketWatchlist'))
+                instance.informationMessageId.marketWatchlist = null;
+
         }
 
         if (!instance.hasOwnProperty('activeServer')) instance.activeServer = null;
@@ -203,6 +209,19 @@ module.exports = (client, guild) => {
     /* Check every serverList for missing keys */
     for (const [serverId, content] of Object.entries(instance.serverList)) {
         if (!content.hasOwnProperty('customCameraGroups')) content.customCameraGroups = {};
+            // --- Playtime (per server, per wipe) ---
+    if (!content.hasOwnProperty('playtime')) {
+        content.playtime = {
+            totals: {},        // steamId -> seconds (accumulated)
+            onlineSince: {},   // steamId -> epoch ms (session start)
+            resetKey: null     // seed:salt:size for wipe detection
+        };
+    } else {
+        if (!content.playtime.hasOwnProperty('totals')) content.playtime.totals = {};
+        if (!content.playtime.hasOwnProperty('onlineSince')) content.playtime.onlineSince = {};
+        if (!content.playtime.hasOwnProperty('resetKey')) content.playtime.resetKey = null;
+    }
+
     }
 
     client.setInstance(guild.id, instance);

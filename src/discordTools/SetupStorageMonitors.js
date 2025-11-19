@@ -47,30 +47,37 @@ module.exports = async (client, rustplus) => {
         client.setInstance(guildId, instance);
 
         if (entity.reachable) {
-            rustplus.storageMonitors[entityId] = {
-                items: info.entityInfo.payload.items,
-                expiry: info.entityInfo.payload.protectionExpiry,
-                capacity: info.entityInfo.payload.capacity,
-                hasProtection: info.entityInfo.payload.hasProtection
-            }
+            // Defensive: payload may be missing even when response is considered valid
+            const payload = info && info.entityInfo && info.entityInfo.payload ? info.entityInfo.payload : null;
+            if (!payload) {
+                // Log a warning and skip setting fields to avoid TypeError
+                try { rustplus.log('WARNING', `SetupStorageMonitors: missing payload for entity ${entityId}`,'warning'); } catch (e) { /* ignore logging errors */ }
+            } else {
+                rustplus.storageMonitors[entityId] = {
+                    items: payload.items,
+                    expiry: payload.protectionExpiry,
+                    capacity: payload.capacity,
+                    hasProtection: payload.hasProtection
+                }
 
-            if (info.entityInfo.payload.capacity !== 0) {
-                if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_TOOL_CUPBOARD_CAPACITY) {
-                    entity.type = 'toolCupboard';
-                    if (info.entityInfo.payload.protectionExpiry === 0) {
-                        entity.decaying = true;
+                if (payload.capacity !== 0) {
+                    if (payload.capacity === Constants.STORAGE_MONITOR_TOOL_CUPBOARD_CAPACITY) {
+                        entity.type = 'toolCupboard';
+                        if (payload.protectionExpiry === 0) {
+                            entity.decaying = true;
+                        }
+                        else {
+                            entity.decaying = false;
+                        }
                     }
-                    else {
-                        entity.decaying = false;
+                    else if (payload.capacity === Constants.STORAGE_MONITOR_VENDING_MACHINE_CAPACITY) {
+                        entity.type = 'vendingMachine';
                     }
+                    else if (payload.capacity === Constants.STORAGE_MONITOR_LARGE_WOOD_BOX_CAPACITY) {
+                        entity.type = 'largeWoodBox';
+                    }
+                    client.setInstance(guildId, instance);
                 }
-                else if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_VENDING_MACHINE_CAPACITY) {
-                    entity.type = 'vendingMachine';
-                }
-                else if (info.entityInfo.payload.capacity === Constants.STORAGE_MONITOR_LARGE_WOOD_BOX_CAPACITY) {
-                    entity.type = 'largeWoodBox';
-                }
-                client.setInstance(guildId, instance);
             }
         }
 

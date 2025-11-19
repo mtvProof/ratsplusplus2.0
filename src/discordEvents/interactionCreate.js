@@ -15,12 +15,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     https://github.com/alexemanuelol/rustplusplus
-
 */
 
 const Discord = require('discord.js');
-
+const MrcLimits = require('../discordTools/MainResourcesCompsLimits');
 const DiscordEmbeds = require('../discordTools/discordEmbeds');
+const MRC = require('../discordTools/MainResourcesCompsLimits');
+
+
 
 module.exports = {
     name: 'interactionCreate',
@@ -29,11 +31,9 @@ module.exports = {
 
         /* Check so that the interaction comes from valid channels */
         if (!Object.values(instance.channelId).includes(interaction.channelId) && !interaction.isCommand) {
-            client.log(client.intlGet(null, 'warningCap'), client.intlGet(null, 'interactionInvalidChannel'))
-            if (interaction.isButton()) {
-                try {
-                    interaction.deferUpdate();
-                }
+            client.log(client.intlGet(null, 'warningCap'), client.intlGet(null, 'interactionInvalidChannel'));
+            if (interaction.isButton && interaction.isButton()) {
+                try { interaction.deferUpdate(); }
                 catch (e) {
                     client.log(client.intlGet(null, 'errorCap'),
                         client.intlGet(null, 'couldNotDeferInteraction'), 'error');
@@ -41,11 +41,66 @@ module.exports = {
             }
         }
 
-        if (interaction.isButton()) {
-            require('../handlers/buttonHandler')(client, interaction);
+        // ---- ROUTE MRC LIMITS CONTROLS FIRST ----
+        // Buttons (Edit, Toggle, JSON editor, category tabs, close)
+        if (interaction.isButton && interaction.isButton()) {
+            const id = interaction.customId;
+            if (
+                id === 'mrc_limits_toggle'     ||
+                id === 'mrc_limits_edit'       ||
+                id === 'mrc_limits_edit_json'  ||
+                id === 'mrc_cat_resources'     ||
+                id === 'mrc_cat_components'    ||
+                id === 'mrc_editor_close'
+            ) {
+                try { await MrcLimits.handleButton(interaction); }
+                catch (e) {
+                    client.log(client.intlGet(null, 'errorCap'), `MRC button error: ${e.message}`, 'error');
+                }
+                return; // prevent double-handling
+            }
         }
-        else if (interaction.isStringSelectMenu()) {
-            require('../handlers/selectMenuHandler')(client, interaction);
+
+        // Select menu (pick an item to set limit)
+        if (interaction.isStringSelectMenu && interaction.isStringSelectMenu()) {
+            if (interaction.customId === 'mrc_item_select') {
+                try { await MrcLimits.handleSelect(interaction); }
+                catch (e) {
+                    client.log(client.intlGet(null, 'errorCap'), `MRC select error: ${e.message}`, 'error');
+                }
+                return; // prevent double-handling
+            }
+        }
+
+        // Modals (single-item numeric modal and legacy JSON modal)
+        if (
+            (interaction.isModalSubmit && interaction.isModalSubmit()) ||
+            interaction.type === Discord.InteractionType.ModalSubmit
+        ) {
+            if (
+                interaction.customId === 'mrc_limits_modal' ||
+                (typeof interaction.customId === 'string' && interaction.customId.startsWith('mrc_limit_modal_single:'))
+            ) {
+                try { await MrcLimits.handleModal(interaction); }
+                catch (e) {
+                    client.log(client.intlGet(null, 'errorCap'), `MRC modal error: ${e.message}`, 'error');
+                }
+                return; // prevent double-handling
+            }
+        }
+        // -----------------------------------------
+
+        if (interaction.isButton && interaction.isButton()) {
+try { await require('../handlers/buttonHandler')(client, interaction); }
+catch (e) {
+  client.log(client.intlGet(null, 'errorCap'), `buttonHandler crashed: ${e.stack || e}`, 'error');
+}
+        }
+        else if (interaction.isStringSelectMenu && interaction.isStringSelectMenu()) {
+try { await require('../handlers/selectMenuHandler')(client, interaction); }
+catch (e) {
+  client.log(client.intlGet(null, 'errorCap'), `selectMenuHandler crashed: ${e.stack || e}`, 'error');
+}
         }
         else if (interaction.type === Discord.InteractionType.ApplicationCommand) {
             const command = interaction.client.commands.get(interaction.commandName);
@@ -65,15 +120,16 @@ module.exports = {
             }
         }
         else if (interaction.type === Discord.InteractionType.ModalSubmit) {
-            require('../handlers/modalHandler')(client, interaction);
+try { await require('../handlers/modalHandler')(client, interaction); }
+catch (e) {
+  client.log(client.intlGet(null, 'errorCap'), `modalHandler crashed: ${e.stack || e}`, 'error');
+}
         }
         else {
             client.log(client.intlGet(null, 'errorCap'), client.intlGet(null, 'unknownInteraction'), 'error');
 
-            if (interaction.isButton()) {
-                try {
-                    interaction.deferUpdate();
-                }
+            if (interaction.isButton && interaction.isButton()) {
+                try { interaction.deferUpdate(); }
                 catch (e) {
                     client.log(client.intlGet(null, 'errorCap'),
                         client.intlGet(null, 'couldNotDeferInteraction'), 'error');

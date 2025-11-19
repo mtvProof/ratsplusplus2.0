@@ -18,7 +18,25 @@
 
 */
 
+const { buildStreamDeckCountUrl } = require('../util/StreamDeckWebhook');
+let MRC_KEYS = {};
+try { MRC_KEYS = require('../discordTools/MainResourcesCompsBox'); } catch {}
+const RES_KEYS  = MRC_KEYS.RESOURCE_KEYS  || ['Wood','Stones','Metal Fragments','High Quality Metal','Leather','Diesel Fuel','Sulfur','Cloth','Animal Fat','Charcoal','Explosives','Gun Powder','Scrap'];
+const COMP_KEYS = MRC_KEYS.COMPONENT_KEYS || ['Tech Trash','CCTV Camera','Targeting Computer','Metal Pipe','Rifle Body','Gears','Semi Automatic Body','Road Signs','SMG Body','Sewing Kit','Rope','Metal Blade','Tarp','Electric Fuse','Sheet Metal','Metal Spring'];
+const BOOM_KEYS = MRC_KEYS.BOOM_KEYS      || ['Rocket','High Velocity Rocket','Incendiary Rocket','C4','Satchel Charge','MLRS Rocket','MLRS Aiming Module','Explosive 5.56 Rifle Ammo'];
+
+
+const {
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder,
+} = require('discord.js');
+
+
 const Discord = require('discord.js');
+const { buildStreamDeckUrl, buildStreamDeckStatusUrl } = require('../util/StreamDeckWebhook');
+
 
 const Config = require('../../config');
 const DiscordMessages = require('../discordTools/discordMessages.js');
@@ -26,6 +44,13 @@ const DiscordTools = require('../discordTools/discordTools.js');
 const SmartSwitchGroupHandler = require('./smartSwitchGroupHandler.js');
 const DiscordButtons = require('../discordTools/discordButtons.js');
 const DiscordModals = require('../discordTools/discordModals.js');
+const getClient = require('../util/getClient');
+
+function safeParse(str) {
+  try { return JSON.parse(str); }
+  catch { return null; }
+}
+
 
 module.exports = async (client, interaction) => {
     const instance = client.getInstance(interaction.guildId);
@@ -45,7 +70,8 @@ module.exports = async (client, interaction) => {
     }
 
     if (interaction.customId.startsWith('DiscordNotification')) {
-        const ids = JSON.parse(interaction.customId.replace('DiscordNotification', ''));
+const ids = safeParse(interaction.customId.replace('DiscordNotification', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const setting = instance.notificationSettings[ids.setting];
 
         setting.discord = !setting.discord;
@@ -64,7 +90,8 @@ module.exports = async (client, interaction) => {
         });
     }
     else if (interaction.customId.startsWith('InGameNotification')) {
-        const ids = JSON.parse(interaction.customId.replace('InGameNotification', ''));
+const ids = safeParse(interaction.customId.replace('InGameNotification', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const setting = instance.notificationSettings[ids.setting];
 
         setting.inGame = !setting.inGame;
@@ -83,7 +110,8 @@ module.exports = async (client, interaction) => {
         });
     }
     else if (interaction.customId.startsWith('VoiceNotification')) {
-        const ids = JSON.parse(interaction.customId.replace('VoiceNotification', ''));
+const ids = safeParse(interaction.customId.replace('VoiceNotification', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const setting = instance.notificationSettings[ids.setting];
 
         setting.voice = !setting.voice;
@@ -117,6 +145,91 @@ module.exports = async (client, interaction) => {
                 instance.generalSettings.inGameCommandsEnabled)]
         });
     }
+    else if (interaction.isButton() && interaction.customId === 'MrcWebhooks') {
+  const gid = interaction.guildId;
+
+   // Build full text blocks, then chunk to ≤2000 characters per message
+   const mkBlock = (title, keys) => {
+     const parts = [`**${title}**`];
+     for (const k of keys) {
+       parts.push(`• ${k}`);
+       parts.push(buildStreamDeckCountUrl(client, gid, k, 'txt'));
+     }
+     return parts.join('\n');
+   };
+
+   const blocks = [
+     mkBlock('Resources', RES_KEYS),
+     mkBlock('Components', COMP_KEYS),
+     mkBlock('Boom', BOOM_KEYS)
+   ];
+
+   // Ack fast to avoid "Unknown interaction"
+   await interaction.deferReply({ ephemeral: true });
+
+   const MAX = 1800; // safety margin under Discord’s 2000
+   let first = true;
+   for (const b of blocks) {
+     // send b in chunks of MAX
+    let i = 0;
+    while (i < b.length) {
+      const chunk = b.slice(i, i + MAX);
+      if (first) {
+        await interaction.editReply({ content: chunk });
+        first = false;
+      } else {
+        await interaction.followUp({ content: chunk, ephemeral: true });
+      }
+      i += MAX;
+    }
+   }
+   return;
+
+  return;
+}
+
+else if (interaction.customId === 'BaseCodeEdit') {
+  const guildId = interaction.guildId;
+  const current = client.getInstance(guildId)?.generalSettings?.baseCode ?? '';
+
+  const modal = new ModalBuilder()
+    .setCustomId('BaseCodeEditModal')
+    .setTitle(client.intlGet(guildId, 'baseCodesHeader'));
+
+  const input = new TextInputBuilder()
+    .setCustomId('BaseCodeInput')
+    .setLabel(client.intlGet(guildId, 'baseCodeCurrent'))
+    .setPlaceholder('1234 (leave blank to clear)')
+    .setStyle(TextInputStyle.Short)
+    .setMinLength(0)          // allow clearing
+    .setMaxLength(4)
+    .setRequired(false);      // allow empty submit
+
+  // Only prefill if we have a valid 4-digit code
+  if (/^\d{4}$/.test(current)) input.setValue(current);
+
+  modal.addComponents(new ActionRowBuilder().addComponents(input));
+  await interaction.showModal(modal);
+  return;
+}
+ else if (interaction.customId === 'CodeCommandEnabled') {
+   const guildId = interaction.guildId;
+  const instance = client.getInstance(guildId);
+  if (!instance.generalSettings) instance.generalSettings = {};
+
+  const cur = instance.generalSettings.codeCommandEnabled !== false; // default true
+  instance.generalSettings.codeCommandEnabled = !cur;
+  client.setInstance(guildId, instance);
+
+  // Update this message's buttons inline
+  await client.interactionUpdate(interaction, {
+    components: [DiscordButtons.getBaseCodeButtons(
+      guildId,
+      instance.generalSettings.codeCommandEnabled
+    )]
+  });
+}
+
     else if (interaction.customId === 'BotMutedInGame') {
         instance.generalSettings.muteInGameBotMessages = !instance.generalSettings.muteInGameBotMessages;
         client.setInstance(guildId, instance);
@@ -133,6 +246,70 @@ module.exports = async (client, interaction) => {
                 instance.generalSettings.muteInGameBotMessages)]
         });
     }
+
+else if (interaction.isButton() && interaction.customId.startsWith('GroupWebhooks')) {
+  try {
+    const idJson = interaction.customId.replace(/^GroupWebhooks/, '');
+    const { serverId, groupId } = JSON.parse(idJson);
+
+    const instance = client.getInstance(interaction.guildId);
+    const group = instance?.serverList?.[serverId]?.switchGroups?.[groupId];
+    const groupName = (group?.name || group?.title || `Group-${groupId}`).toString();
+
+    // Build the copyable URL (uses active/connected server at runtime)
+    const url = buildStreamDeckUrl(client, interaction.guildId, groupName, 'toggle');
+    const statusUrl = buildStreamDeckStatusUrl(client, interaction.guildId, groupName, 'txt');
+
+
+    // Helpful hint if base wasn't configured via env var
+    const sdBase = instance?.generalSettings?.streamdeck?.base;
+    const hint = (process.env.STREAMDECK_PUBLIC_BASE ? '' :
+      '\n\n*Tip:* set `STREAMDECK_PUBLIC_BASE` in your env to your public host:port for a fully correct URL.');
+
+await interaction.reply({
+  content:
+    `**Copy this into your Stream Deck button (TOGGLE):**\n\`${url}\`\n\n` +
+    `**Status URL (returns ON/OFF):**\n\`${statusUrl}\`\n\n` +
+    `• Change \`action=toggle\` to \`on\` or \`off\` if you want.\n` +
+    `• Group: **${groupName}**` +
+    (process.env.STREAMDECK_PUBLIC_BASE ? '' :
+      '\n\n*Tip:* set `STREAMDECK_PUBLIC_BASE` in your env to your public host:port for a fully correct URL.'),
+  ephemeral: true
+});
+  } catch (e) {
+    await interaction.reply({ content: `Could not build webhook URL: \`${e.message}\``, ephemeral: true });
+  }
+  return;
+}
+else if (interaction.customId === 'MrcWebhooks') {
+  const { RESOURCE_KEYS, COMPONENT_KEYS, BOOM_KEYS } =
+    require('../discordTools/MainResourcesCompsBox');
+  const { buildStreamDeckCountUrl } =
+    require('../util/StreamDeckWebhook');
+  const Discord = require('discord.js');
+
+  const gid = interaction.guildId;
+
+  const make = (bucket, keys) =>
+    keys.map(k => `${k}: ${buildStreamDeckCountUrl(client, gid, bucket, k, 'txt')}`).join('\n');
+
+  const body =
+    '[RESOURCES]\n'  + make('resources',  RESOURCE_KEYS) + '\n\n' +
+    '[COMPONENTS]\n' + make('components', COMPONENT_KEYS) + '\n\n' +
+    '[BOOM]\n'       + make('boom',       BOOM_KEYS || []);
+
+  const file = new Discord.AttachmentBuilder(Buffer.from(body, 'utf8'),
+                                             { name: 'mrc-webhooks.txt' });
+
+  await interaction.reply({
+    content: 'Here are copy-paste links for each item (plain number response).',
+    files: [file],
+    ephemeral: true
+  });
+  return;
+}
+
+
     else if (interaction.customId === 'InGameTeammateConnection') {
         instance.generalSettings.connectionNotify = !instance.generalSettings.connectionNotify;
         client.setInstance(guildId, instance);
@@ -426,7 +603,8 @@ module.exports = async (client, interaction) => {
         });
     }
     else if (interaction.customId.startsWith('ServerConnect')) {
-        const ids = JSON.parse(interaction.customId.replace('ServerConnect', ''));
+const ids = safeParse(interaction.customId.replace('ServerConnect', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server) {
@@ -458,7 +636,8 @@ module.exports = async (client, interaction) => {
         newRustplus.isNewConnection = true;
     }
     else if (interaction.customId.startsWith('ServerEdit')) {
-        const ids = JSON.parse(interaction.customId.replace('ServerEdit', ''));
+const ids = safeParse(interaction.customId.replace('ServerEdit', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server) {
@@ -470,7 +649,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('DeleteUnreachableDevices')) {
-        const ids = JSON.parse(interaction.customId.replace('DeleteUnreachableDevices', ''));
+const ids = safeParse(interaction.customId.replace('DeleteUnreachableDevices', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server) {
@@ -515,7 +695,8 @@ module.exports = async (client, interaction) => {
         client.setInstance(guildId, instance);
     }
     else if (interaction.customId.startsWith('CustomTimersEdit')) {
-        const ids = JSON.parse(interaction.customId.replace('CustomTimersEdit', ''));
+const ids = safeParse(interaction.customId.replace('CustomTimersEdit', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server) {
@@ -527,7 +708,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('CreateTracker')) {
-        const ids = JSON.parse(interaction.customId.replace('CreateTracker', ''));
+const ids = safeParse(interaction.customId.replace('CreateTracker', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server) {
@@ -557,8 +739,8 @@ module.exports = async (client, interaction) => {
         await DiscordMessages.sendTrackerMessage(guildId, trackerId);
     }
     else if (interaction.customId.startsWith('CreateGroup')) {
-        const ids = JSON.parse(interaction.customId.replace('CreateGroup', ''));
-        const server = instance.serverList[ids.serverId];
+const ids = safeParse(interaction.customId.replace('CreateGroup', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }        const server = instance.serverList[ids.serverId];
 
         if (!server) {
             await interaction.message.delete();
@@ -587,8 +769,8 @@ module.exports = async (client, interaction) => {
     }
     else if (interaction.customId.startsWith('ServerDisconnect') ||
         interaction.customId.startsWith('ServerReconnecting')) {
-        const ids = JSON.parse(interaction.customId.replace('ServerDisconnect', '')
-            .replace('ServerReconnecting', ''));
+const ids = safeParse(interaction.customId.replace('ServerDisconnect', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }            
         const server = instance.serverList[ids.serverId];
 
         if (!server) {
@@ -609,7 +791,8 @@ module.exports = async (client, interaction) => {
         await DiscordMessages.sendServerMessage(guildId, ids.serverId, null, interaction);
     }
     else if (interaction.customId.startsWith('ServerDelete')) {
-        const ids = JSON.parse(interaction.customId.replace('ServerDelete', ''));
+const ids = safeParse(interaction.customId.replace('ServerDelete', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (Config.discord.needAdminPrivileges && !client.isAdministrator(interaction)) {
@@ -709,7 +892,8 @@ module.exports = async (client, interaction) => {
         SmartSwitchGroupHandler.updateSwitchGroupIfContainSwitch(client, guildId, ids.serverId, ids.entityId);
     }
     else if (interaction.customId.startsWith('SmartSwitchEdit')) {
-        const ids = JSON.parse(interaction.customId.replace('SmartSwitchEdit', ''));
+const ids = safeParse(interaction.customId.replace('SmartSwitchEdit', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.switches.hasOwnProperty(ids.entityId))) {
@@ -721,7 +905,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('SmartSwitchDelete')) {
-        const ids = JSON.parse(interaction.customId.replace('SmartSwitchDelete', ''));
+const ids = safeParse(interaction.customId.replace('SmartSwitchDelete', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (Config.discord.needAdminPrivileges && !client.isAdministrator(interaction)) {
@@ -755,7 +940,8 @@ module.exports = async (client, interaction) => {
         client.setInstance(guildId, instance);
     }
     else if (interaction.customId.startsWith('SmartAlarmEveryone')) {
-        const ids = JSON.parse(interaction.customId.replace('SmartAlarmEveryone', ''));
+const ids = safeParse(interaction.customId.replace('SmartAlarmEveryone', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.alarms.hasOwnProperty(ids.entityId))) {
@@ -773,8 +959,31 @@ module.exports = async (client, interaction) => {
 
         await DiscordMessages.sendSmartAlarmMessage(guildId, ids.serverId, ids.entityId, interaction);
     }
+    else if (interaction.customId.startsWith('SmartAlarmNotify')) {
+const ids = safeParse(interaction.customId.replace('SmartAlarmNotify', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
+  const server = instance.serverList[ids.serverId];
+
+  if (!server || !server.alarms.hasOwnProperty(ids.entityId)) {
+    await interaction.message.delete();
+    return;
+  }
+
+  const cur = server.alarms[ids.entityId].notify !== false; // default ON
+  server.alarms[ids.entityId].notify = !cur;
+  client.setInstance(guildId, instance);
+
+  client.log(client.intlGet(null, 'infoCap'), client.intlGet(null, 'buttonValueChange', {
+    id: `${verifyId}`,
+    value: `${server.alarms[ids.entityId].notify}`
+  }));
+
+  // Re-render the alarm card in-place (edits the existing message)
+  await DiscordMessages.sendSmartAlarmMessage(guildId, ids.serverId, ids.entityId, interaction);
+}
     else if (interaction.customId.startsWith('SmartAlarmDelete')) {
-        const ids = JSON.parse(interaction.customId.replace('SmartAlarmDelete', ''));
+const ids = safeParse(interaction.customId.replace('SmartAlarmDelete', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (Config.discord.needAdminPrivileges && !client.isAdministrator(interaction)) {
@@ -794,7 +1003,8 @@ module.exports = async (client, interaction) => {
         client.setInstance(guildId, instance);
     }
     else if (interaction.customId.startsWith('SmartAlarmEdit')) {
-        const ids = JSON.parse(interaction.customId.replace('SmartAlarmEdit', ''));
+const ids = safeParse(interaction.customId.replace('SmartAlarmEdit', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.alarms.hasOwnProperty(ids.entityId))) {
@@ -806,7 +1016,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('StorageMonitorToolCupboardEveryone')) {
-        const ids = JSON.parse(interaction.customId.replace('StorageMonitorToolCupboardEveryone', ''));
+const ids = safeParse(interaction.customId.replace('StorageMonitorToolCupboardEveryone', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.storageMonitors.hasOwnProperty(ids.entityId))) {
@@ -825,7 +1036,8 @@ module.exports = async (client, interaction) => {
         await DiscordMessages.sendStorageMonitorMessage(guildId, ids.serverId, ids.entityId, interaction);
     }
     else if (interaction.customId.startsWith('StorageMonitorToolCupboardInGame')) {
-        const ids = JSON.parse(interaction.customId.replace('StorageMonitorToolCupboardInGame', ''));
+const ids = safeParse(interaction.customId.replace('StorageMonitorToolCupboardInGame', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.storageMonitors.hasOwnProperty(ids.entityId))) {
@@ -844,7 +1056,8 @@ module.exports = async (client, interaction) => {
         await DiscordMessages.sendStorageMonitorMessage(guildId, ids.serverId, ids.entityId, interaction);
     }
     else if (interaction.customId.startsWith('StorageMonitorEdit')) {
-        const ids = JSON.parse(interaction.customId.replace('StorageMonitorEdit', ''));
+const ids = safeParse(interaction.customId.replace('StorageMonitorEdit', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.storageMonitors.hasOwnProperty(ids.entityId))) {
@@ -856,7 +1069,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('StorageMonitorToolCupboardDelete')) {
-        const ids = JSON.parse(interaction.customId.replace('StorageMonitorToolCupboardDelete', ''));
+const ids = safeParse(interaction.customId.replace('StorageMonitorToolCupboardDelete', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (Config.discord.needAdminPrivileges && !client.isAdministrator(interaction)) {
@@ -875,8 +1089,176 @@ module.exports = async (client, interaction) => {
         delete server.storageMonitors[ids.entityId];
         client.setInstance(guildId, instance);
     }
-    else if (interaction.customId.startsWith('StorageMonitorRecycle')) {
-        const ids = JSON.parse(interaction.customId.replace('StorageMonitorRecycle', ''));
+
+    else if (interaction.customId.startsWith('StorageMonitorToolCupboardUpkeepSet')) {
+const ids = safeParse(interaction.customId.replace('StorageMonitorToolCupboardUpkeepSet', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
+  const sm = instance.serverList?.[ids.serverId]?.storageMonitors?.[ids.entityId];
+  const preset = (sm?.tcDailyUpkeep) || {};
+
+  const modal = new ModalBuilder()
+    .setCustomId('TCUpkeepEdit' + JSON.stringify(ids))
+    .setTitle('Set TC Daily Upkeep');
+
+  const mkInput = (id, label, presetVal = '') =>
+    new ActionRowBuilder().addComponents(
+      new TextInputBuilder()
+        .setCustomId(id)
+        .setLabel(label + ' per 24h')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(false)
+        .setPlaceholder('0')
+        .setValue(String(presetVal ?? ''))
+    );
+
+  modal.addComponents(
+    mkInput('upkeep_wood',   'Wood',           preset.wood),
+    mkInput('upkeep_stones', 'Stones',         preset.stones),
+    mkInput('upkeep_frags',  'Metal Fragments',preset['metal.fragments']),
+    mkInput('upkeep_hqm',    'HQM (Refined)',  preset['metal.refined'])
+  );
+  await interaction.showModal(modal);
+  return;
+}
+
+    
+else if (interaction.customId.startsWith('StorageMonitorToolCupboardUpkeep')) {
+const ids = safeParse(interaction.customId.replace('StorageMonitorToolCupboardUpkeep', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
+  const server = instance.serverList[ids.serverId];
+
+  if (!server || !server.storageMonitors?.hasOwnProperty(ids.entityId)) {
+    // initial response (no modal path), safe to reply
+    await interaction.reply({ content: 'Storage monitor not found.', ephemeral: true }).catch(() => {});
+    return;
+  }
+
+  const sm = server.storageMonitors[ids.entityId];
+  const saved = sm.tcDailyUpkeep || null;
+  const hasDaily = !!saved && (
+    Number(saved.wood) > 0 ||
+    Number(saved.stones) > 0 ||
+    Number(saved['metal.fragments']) > 0 ||
+    Number(saved['metal.refined']) > 0
+  );
+
+  // ---- If we DON'T have saved upkeep yet: show the modal FIRST (no defer/reply beforehand) ----
+  if (!hasDaily) {
+    const modal = new ModalBuilder()
+      .setCustomId('TCUpkeepEdit' + JSON.stringify(ids))
+      .setTitle('Set TC Daily Upkeep');
+
+    const mkInput = (id, label, preset = '') =>
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId(id)
+          .setLabel(label + ' per 24h')
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+          .setPlaceholder('0')
+          .setValue(String(preset ?? ''))
+      );
+
+    const preset = saved || {};
+    modal.addComponents(
+      mkInput('upkeep_wood',   'Wood',           preset.wood),
+      mkInput('upkeep_stones', 'Stones',         preset.stones),
+      mkInput('upkeep_frags',  'Metal Fragments',preset['metal.fragments']),
+      mkInput('upkeep_hqm',    'HQM (Refined)',  preset['metal.refined'])
+    );
+
+    // IMPORTANT: do not defer or reply before showing a modal
+    await interaction.showModal(modal).catch(() => {});
+    return;
+  }
+
+  // ---- We DO have saved daily upkeep → now we can defer and compute ----
+  if (!interaction.deferred && !interaction.replied) {
+    await interaction.deferReply({ ephemeral: true }).catch(() => {});
+  }
+
+  const daily = {
+    wood: Number(saved.wood) || 0,
+    stones: Number(saved.stones) || 0,
+    'metal.fragments': Number(saved['metal.fragments']) || 0,
+    'metal.refined': Number(saved['metal.refined']) || 0
+  };
+
+  // Calculator: 24 slots, stacks (wood/stone/frags=1000, HQM=100)
+  const MAX_SLOTS = 24;
+  const STACK = { wood: 1000, stones: 1000, 'metal.fragments': 1000, 'metal.refined': 100 };
+  const KEYS = ['wood', 'stones', 'metal.fragments', 'metal.refined'];
+
+  const slotsUsed = (T) => KEYS.reduce(
+    (sum, k) => sum + Math.ceil(((daily[k] || 0) * T) / STACK[k]), 0
+  );
+
+  let lo = 0, hi = 1;
+  while (slotsUsed(hi) <= MAX_SLOTS) hi *= 2;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (slotsUsed(mid) <= MAX_SLOTS) lo = mid; else hi = mid;
+  }
+  const T = lo;
+
+  const out = {
+    wood: Math.ceil((daily.wood || 0) * T),
+    stones: Math.ceil((daily.stones || 0) * T),
+    'metal.fragments': Math.ceil((daily['metal.fragments'] || 0) * T),
+    'metal.refined': Math.ceil((daily['metal.refined'] || 0) * T)
+  };
+
+  const payload = [
+    {
+      "TargetCategory": null,
+      "MaxAmountInOutput": out.wood || 0,
+      "BufferAmount": 0,
+      "MinAmountInInput": 0,
+      "IsBlueprint": false,
+      "BufferTransferRemaining": 0,
+      "TargetItemName": "wood"
+    },
+    {
+      "TargetCategory": null,
+      "MaxAmountInOutput": out.stones || 0,
+      "BufferAmount": 0,
+      "MinAmountInInput": 0,
+      "IsBlueprint": false,
+      "BufferTransferRemaining": 0,
+      "TargetItemName": "stones"
+    },
+    {
+      "TargetCategory": null,
+      "MaxAmountInOutput": out['metal.fragments'] || 0,
+      "BufferAmount": 0,
+      "MinAmountInInput": 0,
+      "IsBlueprint": false,
+      "BufferTransferRemaining": 0,
+      "TargetItemName": "metal.fragments"
+    },
+    {
+      "TargetCategory": null,
+      "MaxAmountInOutput": out['metal.refined'] || 0,
+      "BufferAmount": 0,
+      "MinAmountInInput": 0,
+      "IsBlueprint": false,
+      "BufferTransferRemaining": 0,
+      "TargetItemName": "metal.refined"
+    }
+  ];
+
+  await interaction.editReply({
+    content: '```json\n' + JSON.stringify(payload, null, 2) + '\n```',
+    ephemeral: true
+  }).catch(() => {});
+  return;
+}
+
+
+
+else if (interaction.customId.startsWith('StorageMonitorRecycle')) {
+const ids = safeParse(interaction.customId.replace('StorageMonitorRecycle', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.storageMonitors.hasOwnProperty(ids.entityId))) {
@@ -900,6 +1282,18 @@ module.exports = async (client, interaction) => {
             return;
         }
 
+        // Ensure entityInfo contains payload before attempting to read items
+        if (!entityInfo || !entityInfo.entityInfo || !entityInfo.entityInfo.payload) {
+            if (server.storageMonitors[ids.entityId].reachable) {
+                await DiscordMessages.sendStorageMonitorNotFoundMessage(guildId, ids.serverId, ids.entityId);
+            }
+            server.storageMonitors[ids.entityId].reachable = false;
+            client.setInstance(guildId, instance);
+
+            await DiscordMessages.sendStorageMonitorMessage(guildId, ids.serverId, ids.entityId);
+            return;
+        }
+
         server.storageMonitors[ids.entityId].reachable = true;
         client.setInstance(guildId, instance);
 
@@ -913,7 +1307,8 @@ module.exports = async (client, interaction) => {
         }, 30000);
     }
     else if (interaction.customId.startsWith('StorageMonitorContainerDelete')) {
-        const ids = JSON.parse(interaction.customId.replace('StorageMonitorContainerDelete', ''));
+const ids = safeParse(interaction.customId.replace('StorageMonitorContainerDelete', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (Config.discord.needAdminPrivileges && !client.isAdministrator(interaction)) {
@@ -953,8 +1348,8 @@ module.exports = async (client, interaction) => {
         interaction.deferUpdate();
 
         if (rustplus) {
-            clearTimeout(rustplus.currentSwitchTimeouts[ids.group]);
-            delete rustplus.currentSwitchTimeouts[ids.group];
+            clearTimeout(rustplus.currentSwitchTimeouts[ids.groupId]);
+            delete rustplus.currentSwitchTimeouts[ids.groupId];
 
             if (rustplus.serverId === ids.serverId) {
                 const active = (interaction.customId.startsWith('GroupTurnOn') ? true : false);
@@ -983,7 +1378,8 @@ module.exports = async (client, interaction) => {
         }
     }
     else if (interaction.customId.startsWith('GroupEdit')) {
-        const ids = JSON.parse(interaction.customId.replace('GroupEdit', ''));
+const ids = safeParse(interaction.customId.replace('GroupEdit', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.switchGroups.hasOwnProperty(ids.groupId))) {
@@ -995,7 +1391,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('GroupDelete')) {
-        const ids = JSON.parse(interaction.customId.replace('GroupDelete', ''));
+const ids = safeParse(interaction.customId.replace('GroupDelete', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (Config.discord.needAdminPrivileges && !client.isAdministrator(interaction)) {
@@ -1022,7 +1419,8 @@ module.exports = async (client, interaction) => {
         }
     }
     else if (interaction.customId.startsWith('GroupAddSwitch')) {
-        const ids = JSON.parse(interaction.customId.replace('GroupAddSwitch', ''));
+const ids = safeParse(interaction.customId.replace('GroupAddSwitch', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.switchGroups.hasOwnProperty(ids.groupId))) {
@@ -1034,7 +1432,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('GroupRemoveSwitch')) {
-        const ids = JSON.parse(interaction.customId.replace('GroupRemoveSwitch', ''));
+const ids = safeParse(interaction.customId.replace('GroupRemoveSwitch', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.switchGroups.hasOwnProperty(ids.groupId))) {
@@ -1046,7 +1445,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('TrackerEveryone')) {
-        const ids = JSON.parse(interaction.customId.replace('TrackerEveryone', ''));
+const ids = safeParse(interaction.customId.replace('TrackerEveryone', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const tracker = instance.trackers[ids.trackerId];
 
         if (!tracker) {
@@ -1065,7 +1465,8 @@ module.exports = async (client, interaction) => {
         await DiscordMessages.sendTrackerMessage(guildId, ids.trackerId, interaction);
     }
     else if (interaction.customId.startsWith('TrackerUpdate')) {
-        const ids = JSON.parse(interaction.customId.replace('TrackerUpdate', ''));
+const ids = safeParse(interaction.customId.replace('TrackerUpdate', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const tracker = instance.trackers[ids.trackerId];
 
         if (!tracker) {
@@ -1078,7 +1479,8 @@ module.exports = async (client, interaction) => {
         await DiscordMessages.sendTrackerMessage(guildId, ids.trackerId, interaction);
     }
     else if (interaction.customId.startsWith('TrackerEdit')) {
-        const ids = JSON.parse(interaction.customId.replace('TrackerEdit', ''));
+const ids = safeParse(interaction.customId.replace('TrackerEdit', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const tracker = instance.trackers[ids.trackerId];
 
         if (!tracker) {
@@ -1090,7 +1492,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('TrackerDelete')) {
-        const ids = JSON.parse(interaction.customId.replace('TrackerDelete', ''));
+const ids = safeParse(interaction.customId.replace('TrackerDelete', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const tracker = instance.trackers[ids.trackerId];
 
         if (Config.discord.needAdminPrivileges && !client.isAdministrator(interaction)) {
@@ -1110,7 +1513,8 @@ module.exports = async (client, interaction) => {
         client.setInstance(guildId, instance);
     }
     else if (interaction.customId.startsWith('TrackerAddPlayer')) {
-        const ids = JSON.parse(interaction.customId.replace('TrackerAddPlayer', ''));
+const ids = safeParse(interaction.customId.replace('TrackerAddPlayer', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const tracker = instance.trackers[ids.trackerId];
 
         if (!tracker) {
@@ -1122,7 +1526,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('TrackerRemovePlayer')) {
-        const ids = JSON.parse(interaction.customId.replace('TrackerRemovePlayer', ''));
+const ids = safeParse(interaction.customId.replace('TrackerRemovePlayer', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const tracker = instance.trackers[ids.trackerId];
 
         if (!tracker) {
@@ -1134,7 +1539,8 @@ module.exports = async (client, interaction) => {
         await interaction.showModal(modal);
     }
     else if (interaction.customId.startsWith('TrackerInGame')) {
-        const ids = JSON.parse(interaction.customId.replace('TrackerInGame', ''));
+const ids = safeParse(interaction.customId.replace('TrackerInGame', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const tracker = instance.trackers[ids.trackerId];
 
         if (!tracker) {

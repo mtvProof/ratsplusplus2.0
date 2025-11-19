@@ -75,15 +75,22 @@ module.exports = {
                 client.rustplusReconnectTimers[guildId] = null;
             }
 
-            client.rustplusReconnectTimers[guildId] = setTimeout(
-                client.createRustplusInstance.bind(client),
-                Config.general.reconnectIntervalMs,
-                guildId,
-                rustplus.server,
-                rustplus.port,
-                rustplus.playerId,
-                rustplus.playerToken
-            );
+// Keep the base interval you already use
+const base = Config.general.reconnectIntervalMs; // e.g., 15000
+
+// === NEW: add a small random jitter (0–3000 ms) ===
+const jitter = Math.floor(Math.random() * 3000);
+
+client.rustplusReconnectTimers[guildId] = setTimeout(
+  client.createRustplusInstance.bind(client),
+  base + jitter,
+  guildId,
+  rustplus.server,
+  rustplus.port,
+  rustplus.playerId,
+  rustplus.playerToken
+);
+
         }
     },
 };

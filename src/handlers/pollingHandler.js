@@ -31,29 +31,51 @@ const TimeHandler = require('../handlers/timeHandler.js');
 const VendingMachines = require('../handlers/vendingMachineHandler.js');
 
 module.exports = {
-    pollingHandler: async function (rustplus, client) {
-        /* Poll information such as info, mapMarkers, teamInfo and time */
-        let info = await rustplus.getInfoAsync();
-        if (!(await rustplus.isResponseValid(info))) return;
-        let mapMarkers = await rustplus.getMapMarkersAsync();
-        if (!(await rustplus.isResponseValid(mapMarkers))) return;
-        let teamInfo = await rustplus.getTeamInfoAsync();
-        if (!(await rustplus.isResponseValid(teamInfo))) return;
-        let time = await rustplus.getTimeAsync();
-        if (!(await rustplus.isResponseValid(time))) return;
+  // Runs every N seconds via setInterval in your boot code
+  pollingHandler: async function (rustplus, client) {
+    // === NEW: prevent overlapping runs ===
+    if (rustplus._pollingInProgress) {
+      // Another cycle is still running; skip this tick.
+      return;
+    }
+    rustplus._pollingInProgress = true;
 
-        if (rustplus.isFirstPoll) {
-            rustplus.info = new Info(info.info);
-            rustplus.time = new Time(time.time, rustplus, client);
-            rustplus.team = new Team(teamInfo.teamInfo, rustplus);
-            rustplus.mapMarkers = new MapMarkers(mapMarkers.mapMarkers, rustplus, client);
-        }
+    try {
+      /* Poll information such as info, mapMarkers, teamInfo and time */
+      let info = await rustplus.getInfoAsync();
+      if (!(await rustplus.isResponseValid(info))) return;
 
-        await module.exports.handlers(rustplus, client, info, mapMarkers, teamInfo, time);
-        rustplus.isFirstPoll = false;
-    },
+      let mapMarkers = await rustplus.getMapMarkersAsync();
+      if (!(await rustplus.isResponseValid(mapMarkers))) return;
 
-    handlers: async function (rustplus, client, info, mapMarkers, teamInfo, time) {
+      let teamInfo = await rustplus.getTeamInfoAsync();
+      if (!(await rustplus.isResponseValid(teamInfo))) return;
+
+      let time = await rustplus.getTimeAsync();
+      if (!(await rustplus.isResponseValid(time))) return;
+
+      if (rustplus.isFirstPoll) {
+        const Info = require('../structures/Info');
+        const Time = require('../structures/Time');
+        const Team = require('../structures/Team');
+        const MapMarkers = require('../structures/MapMarkers.js');
+
+        rustplus.info = new Info(info.info);
+        rustplus.time = new Time(time.time, rustplus, client);
+        rustplus.team = new Team(teamInfo.teamInfo, rustplus);
+        rustplus.mapMarkers = new MapMarkers(mapMarkers.mapMarkers, rustplus, client);
+      }
+
+      await module.exports.handlers(rustplus, client, info, mapMarkers, teamInfo, time);
+      rustplus.isFirstPoll = false;
+    } finally {
+      // === NEW: always release the lock so future ticks can run ===
+      rustplus._pollingInProgress = false;
+    }
+  },
+
+  // keep your existing handlers body intact
+  handlers: async function (rustplus, client, info, mapMarkers, teamInfo, time) {
         await TeamHandler.handler(rustplus, client, teamInfo.teamInfo);
         rustplus.team.updateTeam(teamInfo.teamInfo);
 
@@ -68,5 +90,5 @@ module.exports = {
         await InformationHandler.handler(rustplus);
         await StorageMonitorHandler.handler(rustplus, client);
         await SmartAlarmHandler.handler(rustplus, client);
-    },
+  }
 };

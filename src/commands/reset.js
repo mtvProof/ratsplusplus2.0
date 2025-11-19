@@ -73,7 +73,7 @@ module.exports = {
 			client.log(client.intlGet(null, 'warningCap'), str);
 			return;
 		}
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: 64 }); // 64 = EPHEMERAL
 
 		const guild = DiscordTools.getGuild(interaction.guildId);
 

@@ -128,7 +128,8 @@ module.exports = async (client, interaction) => {
         });
     }
     else if (interaction.customId.startsWith('AutoDayNightOnOff')) {
-        const ids = JSON.parse(interaction.customId.replace('AutoDayNightOnOff', ''));
+const ids = safeParse(interaction.customId.replace('AutoDayNightOnOff', ''));
+if (!ids) { try { await interaction.deferUpdate(); } catch {} return; }
         const server = instance.serverList[ids.serverId];
 
         if (!server || (server && !server.switches.hasOwnProperty(ids.entityId))) {

@@ -65,4 +65,24 @@ process.on('unhandledRejection', error => {
     console.log(error);
 });
 
+process.on('uncaughtException', (err) => {
+  client.log(client.intlGet(null, 'errorCap'),
+             `Uncaught exception: ${err?.stack || err}`, 'error');
+  // Don't exit — keep the bot running.
+});
+
+process.on('SIGINT', () => {
+  client.log(client.intlGet(null, 'warningCap'), 'Received SIGINT, shutting down gracefully...');
+  try { client.shutdown?.(); } catch {}
+  // Give any open sockets a moment to close
+  setTimeout(() => process.exit(0), 500);
+});
+
+process.on('SIGTERM', () => {
+  client.log(client.intlGet(null, 'warningCap'), 'Received SIGTERM, shutting down gracefully...');
+  try { client.shutdown?.(); } catch {}
+  setTimeout(() => process.exit(0), 500);
+});
+
+
 exports.client = client;

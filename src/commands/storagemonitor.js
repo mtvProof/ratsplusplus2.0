@@ -46,6 +46,14 @@ module.exports = {
 						{ name: client.intlGet(guildId, 'storageMonitor'), value: 'storage_monitor' },
 						{ name: client.intlGet(guildId, 'toolCupboard'), value: 'tool_cupboard' },
 						{ name: client.intlGet(guildId, 'largeWoodBox'), value: 'large_wood_box' },
+						{ name: client.intlGet(guildId, 'gears'), value: 'gears' },
+						{ name: client.intlGet(guildId, 'cloth'), value: 'cloth' },
+						{ name: client.intlGet(guildId, 'lowGradeFuel'), value: 'lowgradefuel' },
+						{ name: client.intlGet(guildId, 'techParts'), value: 'techparts' },
+						{ name: client.intlGet(guildId, 'metalRefined'), value: 'metal_refined' },
+						{ name: client.intlGet(guildId, 'stones'), value: 'stones' },
+						{ name: client.intlGet(guildId, 'metalFragments'), value: 'metal_fragments' },
+						{ name: client.intlGet(guildId, 'wood'), value: 'wood' },
 						{ name: client.intlGet(guildId, 'vendingMachine'), value: 'vending_machine' })));
 	},
 

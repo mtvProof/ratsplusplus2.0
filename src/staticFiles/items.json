@@ -27,7 +27,7 @@
     "20489901": {
         "shortname": "twitchsunglasses",
         "name": "Purple Sunglasses",
-        "description": "Sunglasses - Gained from Rust's first Twitch drop."
+        "description": "Sunglasses - Gained from Rust's first Twitch drop event."
     },
     "21402876": {
         "shortname": "burlap.gloves.new",
@@ -79,11 +79,6 @@
         "name": "Crocodile Pie",
         "description": "A pie made from crocodile meat, may cause a reptile dysfunction. Boosts hunger, health and hydration. Gives better night vision, including tree markings and ore hotspots, for a short time."
     },
-    "54436981": {
-        "shortname": "electric.fairylights",
-        "name": "Fairy Lights",
-        "description": "A wire of small fairy bulbs, can be deployed point by point to light up your base."
-    },
     "60528587": {
         "shortname": "horse.armor.roadsign",
         "name": "Roadsign Horse Armor",
@@ -93,6 +88,11 @@
         "shortname": "photo",
         "name": "Photograph",
         "description": "A photograph taken with an instant camera."
+    },
+    "63265850": {
+        "shortname": "wall.external.high.frontier",
+        "name": "High External Frontier Wall",
+        "description": "A high stone wall used to keep people off your property."
     },
     "69511070": {
         "shortname": "metal.fragments",
@@ -113,11 +113,6 @@
         "shortname": "yellowidtag",
         "name": "Yellow ID Tag",
         "description": "Yellow ID Tag"
-    },
-    "82772055": {
-        "shortname": "horse",
-        "name": "Horse",
-        "description": "Horse"
     },
     "86840834": {
         "shortname": "hazmatsuit_scientist_nvgm",
@@ -143,11 +138,6 @@
         "shortname": "wall.external.high",
         "name": "High External Wooden Wall",
         "description": "A high wooden wall used to keep people off your property."
-    },
-    "104856514": {
-        "shortname": "electric.bulbstringlights",
-        "name": "Bulb String Lights",
-        "description": "A string of glowing bulbs, can be deployed point by point to light up your base."
     },
     "106959911": {
         "shortname": "frankensteins.monster.01.legs",
@@ -237,7 +227,7 @@
     "192249897": {
         "shortname": "rockingchair.rockingchair3",
         "name": "Green",
-        "description": "A rocking chair that responds to your input. Don't fire whilst seated."
+        "description": ""
     },
     "196700171": {
         "shortname": "attire.hide.vest",
@@ -247,12 +237,12 @@
     "196784377": {
         "shortname": "improvised.shield",
         "name": "Improvised Shield",
-        "description": "A makeshift metal shield, sturdy but only protects a small area. Usable with single handed weapons and tools."
+        "description": "A makeshift metal shield, sturdy but only protects a small area. Usable with single handed weapons and tools. "
     },
     "198438816": {
         "shortname": "vending.machine",
         "name": "Vending Machine",
-        "description": "Trade your goods with other players safely by creating sell and buy orders.  \n\nIf a raider gains access to the rear panel, they will have free reign over all of your goodies. Keep it safe."
+        "description": "Trade your goods with other players safely by creating sell and buy orders.  \r\n\r\nIf a raider gains access to the rear panel, they will have free reign over all of your goodies. Keep it safe."
     },
     "200773292": {
         "shortname": "hammer",
@@ -342,12 +332,12 @@
     "271048478": {
         "shortname": "hat.ratmask",
         "name": "Rat Mask",
-        "description": "A Beautifully crafted bronze and gold Rat mask to celebrate the 2020 Lunar New Year. This item replaces the wolf headdress."
+        "description": "A Beautifully crafted bronze and gold Rat mask to celebrate the 2020 Lunar New Year"
     },
     "273172220": {
         "shortname": "fun.trumpet",
         "name": "Plumber's Trumpet",
-        "description": "Toot your own horn with this brassy improvised Trumpet."
+        "description": "Toot your own horn with this brassy improvised Trumpet.\r"
     },
     "273951840": {
         "shortname": "scarecrow.suit",
@@ -464,20 +454,10 @@
         "name": "Basic Crafting Quality Tea",
         "description": "A basic crafting tea. provides hydration and increases the chances of a higher quality crafting outcome for a short time."
     },
-    "375473148": {
-        "shortname": "scraptransportheli",
-        "name": "Scrap Transport Helicopter",
-        "description": null
-    },
     "377750553": {
         "shortname": "pureharvestingtea",
         "name": "Pure Harvesting Tea",
         "description": "A pure harvesting tea, provides hydration and temporarily increases the amount of resources you receive from harvesting corpses a large amount."
-    },
-    "385099196": {
-        "shortname": "4module car chassis",
-        "name": "4 Module Car Chassis",
-        "description": "4 Module Car Chassis"
     },
     "390728933": {
         "shortname": "clone.yellow.berry",
@@ -488,11 +468,6 @@
         "shortname": "crocodilemeat.cooked",
         "name": "Cooked Crocodile Meat",
         "description": "Delicious Crocodile Meat, Eating it will restore some health, hunger, and thirst."
-    },
-    "405904531": {
-        "shortname": "ball",
-        "name": "Soccer Ball",
-        "description": "Soccer Ball"
     },
     "418081930": {
         "shortname": "wood.armor.jacket",
@@ -507,7 +482,7 @@
     "442886268": {
         "shortname": "rocket.launcher",
         "name": "Rocket Launcher",
-        "description": "Unmatched craftsmanship meets devastating firepower."
+        "description": "Shoots rockets slightly farther than North Korea."
     },
     "443432036": {
         "shortname": "fluid.switch",
@@ -531,7 +506,7 @@
     },
     "472505338": {
         "shortname": "rifle.ak.med",
-        "name": "Medieval AR",
+        "name": "Medieval Assault Rifle",
         "description": "Medieval themed high damage machine rifle."
     },
     "476066818": {
@@ -564,11 +539,6 @@
         "name": "RAND Switch",
         "description": "This switch will allow passthrough based on a random number. Each time the SET input receives power it will roll true or false to allow passthrough"
     },
-    "494161326": {
-        "shortname": "rocket.launcher.rpg7",
-        "name": "RPG Launcher",
-        "description": "Unmatched craftsmanship meets devastating firepower."
-    },
     "504109620": {
         "shortname": "sculpture.ice",
         "name": "Ice Sculpture",
@@ -589,11 +559,6 @@
         "name": "Flame Turret",
         "description": "Automated Flame turret. Requires Low Grade Fuel. Sprays flames when triggered."
     },
-    "537946062": {
-        "shortname": "pilot.hazmat.box.wooden",
-        "name": "Flight Recorder Box",
-        "description": "Keep your things in this Flight Recorder box. Stores up to 18 items."
-    },
     "547862680": {
         "shortname": "knighttorso.armour",
         "name": "Knights armour cuirass",
@@ -601,8 +566,8 @@
     },
     "550753330": {
         "shortname": "ammo.snowballgun",
-        "name": "Snowball Gun Ammo",
-        "description": null
+        "name": "",
+        "description": ""
     },
     "553270375": {
         "shortname": "electric.battery.rechargable.large",
@@ -617,7 +582,7 @@
     "553967074": {
         "shortname": "wallpaper.wall",
         "name": "Wallpaper Wall",
-        "description": null
+        "description": ""
     },
     "559147458": {
         "shortname": "fishtrap.small",
@@ -658,11 +623,6 @@
         "shortname": "table",
         "name": "Table",
         "description": "Every home needs a table. A decorative item which provides comfort when in close proximity."
-    },
-    "594041190": {
-        "shortname": "compass",
-        "name": "Compass",
-        "description": "A handy tool which indicates which direction you're facing. Will reveal your location on the map in Hardcore mode if equipped on your belt."
     },
     "596469572": {
         "shortname": "rf.detonator",
@@ -722,17 +682,12 @@
     "625599716": {
         "shortname": "metal.shield",
         "name": "Metal Shield",
-        "description": "A large sturdy metal shield, keeps arrows and bullets at bay. Usable with single handed weapons and tools."
+        "description": "A large sturdy metal shield, keeps arrows and bullets at bay. Usable\r with single handed weapons and tools."
     },
     "634478325": {
         "shortname": "cctv.camera",
         "name": "CCTV Camera",
         "description": "A CCTV Camera system can be used for realtime surveillance and security around your base when powered and paired with the Computer Station."
-    },
-    "640470230": {
-        "shortname": "electric.fluorescentlight.ceiling",
-        "name": "Ceiling Fluorescent Light",
-        "description": "A flicker-free fluorescent light."
     },
     "642482233": {
         "shortname": "sticks",
@@ -749,11 +704,6 @@
         "name": "Revolver",
         "description": "A standard eight shot revolver."
     },
-    "652793345": {
-        "shortname": "krieg.storage.horizontal",
-        "name": "Krieg Storage Crates",
-        "description": "Military-grade crates designed for efficient storage and durability. A staple of any well-supplied outpost."
-    },
     "656371026": {
         "shortname": "carburetor3",
         "name": "High Quality Carburetor",
@@ -768,11 +718,6 @@
         "shortname": "carburetor1",
         "name": "Low Quality Carburetor",
         "description": "A low quality carburetor for a combustion engine. Mixes air and fuel to the proper ratio."
-    },
-    "656829501": {
-        "shortname": "electric.wallcabinet",
-        "name": "Wall Cabinet",
-        "description": "A cabinet with a shelf for small items."
     },
     "657352755": {
         "shortname": "beachtable",
@@ -819,11 +764,6 @@
         "name": "Paper Map",
         "description": "Helps you figure out where you are. You can annotate the map by right-clicking and drawing on it.\n\n\nDrag the map into your belt bar to make it active. You will then be able to view the map by holding down the map button (G by default)."
     },
-    "696029539": {
-        "shortname": "hab",
-        "name": "Hot Air Balloon",
-        "description": "A Hot Air Balloon."
-    },
     "699075597": {
         "shortname": "woodcross",
         "name": "Wooden Cross",
@@ -852,7 +792,7 @@
     "723407026": {
         "shortname": "woodmirror.standing",
         "name": "Wood Mirror Standing",
-        "description": "A standing wooden frontier themed mirror"
+        "description": "A standing wooden mirror"
     },
     "734320711": {
         "shortname": "orchid",
@@ -922,7 +862,7 @@
     "795371088": {
         "shortname": "shotgun.pump",
         "name": "Pump Shotgun",
-        "description": "A Shotgun. Fires 8 rounds."
+        "description": "A Shotgun. Fires six rounds."
     },
     "803222026": {
         "shortname": "box.repair.bench",
@@ -962,7 +902,7 @@
     "818733919": {
         "shortname": "door.hinged.industrial.a",
         "name": "Industrial Door",
-        "description": "A red industrial door with a window."
+        "description": "Medium strength door, vulnerable to explosives."
     },
     "818877484": {
         "shortname": "pistol.semiauto",
@@ -987,7 +927,7 @@
     "831955134": {
         "shortname": "skylantern.skylantern.purple",
         "name": "Sky Lantern - Purple",
-        "description": "#skylantern.skylantern.purple.desc"
+        "description": ""
     },
     "832133926": {
         "shortname": "wood.armor.pants",
@@ -1164,11 +1104,6 @@
         "name": "Skull Trophy",
         "description": "A decorative mount that can hold the skull of a friend or foe."
     },
-    "972302244": {
-        "shortname": "hazmatsuit.kick",
-        "name": "Kick Hazmat",
-        "description": "Hazmat obtained during Kick Drops 2025"
-    },
     "975983052": {
         "shortname": "trophy",
         "name": "Twitch Rivals Trophy",
@@ -1249,11 +1184,6 @@
         "name": "Christmas Lights",
         "description": "A string of colored lights to decorate your home"
     },
-    "1065594600": {
-        "shortname": "hazmatsuit.pilot",
-        "name": "Pilot Hazmat",
-        "description": "A hazmat suit made from a fighter pilot's flight suit."
-    },
     "1072924620": {
         "shortname": "sparkplug3",
         "name": "High Quality Spark Plugs",
@@ -1326,7 +1256,7 @@
     },
     "1115193056": {
         "shortname": "wall.frame.lunar2025_a",
-        "name": "Wall Divider Pack",
+        "name": "Lunar Wall Frame Inlay",
         "description": "A Lunar New Year themed decorative wall divider with geometric inlay"
     },
     "1121416193": {
@@ -1408,11 +1338,6 @@
         "shortname": "electric.andswitch",
         "name": "AND Switch",
         "description": "A logic gate that allows electrical passthrough if BOTH inputs receives power, passthrough amount is the greater of either power source"
-    },
-    "1174484438": {
-        "shortname": "mini fridge",
-        "name": "Mini Fridge",
-        "description": "Ideal for preserving food and keeping items cool."
     },
     "1174957864": {
         "shortname": "cupboard.tool.shockbyte",
@@ -1552,7 +1477,7 @@
     "1272430949": {
         "shortname": "piano",
         "name": "Wheelbarrow Piano",
-        "description": "The Piano is a repurposed wheelbarrow that weighs a ton, but makes up for it with a wide range of notes."
+        "description": "The Piano is a repurposed wheelbarrow that weighs a ton, but makes up for it with a wide range of notes. "
     },
     "1272768630": {
         "shortname": "humanmeat.spoiled",
@@ -1578,11 +1503,6 @@
         "shortname": "sign.neon.125x125",
         "name": "Small Neon Sign",
         "description": "A small neon sign!"
-    },
-    "1305765685": {
-        "shortname": "krieg.storage.vertical",
-        "name": "Krieg Storage Barrel",
-        "description": "Industrial barrels repurposed for the front lines. Sturdy, disciplined, and unmistakably Krieg."
     },
     "1307626005": {
         "shortname": "storage_barrel_b",
@@ -1727,7 +1647,7 @@
     "1394042569": {
         "shortname": "rhib",
         "name": "RHIB",
-        "description": null
+        "description": ""
     },
     "1397052267": {
         "shortname": "supply.signal",
@@ -1797,7 +1717,7 @@
     "1426574435": {
         "shortname": "minihelicopter.repair",
         "name": "Minicopter",
-        "description": null
+        "description": ""
     },
     "1428574144": {
         "shortname": "hopper",
@@ -1843,11 +1763,6 @@
         "shortname": "oretea",
         "name": "Basic Ore Tea",
         "description": "A basic ore tea, provides hydration and temporarily increases your yield from harvesting ores a small amount."
-    },
-    "1482871705": {
-        "shortname": "3module car chassis",
-        "name": "3 Module Car Chassis",
-        "description": "3 Module Car Chassis"
     },
     "1488606552": {
         "shortname": "cupboard.tool.retro",
@@ -1912,7 +1827,7 @@
     "1524980732": {
         "shortname": "carvable.pumpkin",
         "name": "Carvable Pumpkin",
-        "description": "A pumpkin you can carve any design you'd like into and light up at night. Requires wood as a fuel source."
+        "description": "A pumpkin that you can carve. \n\nRequires wood as a fuel source."
     },
     "1525520776": {
         "shortname": "building.planner",
@@ -2019,11 +1934,6 @@
         "name": "Large Planter Box",
         "description": "A large planter with enough room to plant 9 seeds."
     },
-    "1586884551": {
-        "shortname": "lock.code.a.pilot",
-        "name": "Flight Control Codelock",
-        "description": "An electronic lock made of airplane parts. Locked and unlocked with four-digit code."
-    },
     "1588298435": {
         "shortname": "rifle.bolt",
         "name": "Bolt Action Rifle",
@@ -2032,7 +1942,7 @@
     "1588492232": {
         "shortname": "drone",
         "name": "Drone",
-        "description": "A remote controlled drone operated from the Computer station with a limited range. Easily damaged from impacts."
+        "description": "A remote controlled drone operated from the Computer station with a limited range. Easily damaged from impacts. "
     },
     "1601468620": {
         "shortname": "jumpsuit.suit.blue",
@@ -2144,11 +2054,6 @@
         "name": "Small Stocking",
         "description": "A small stocking. Hang it by a fire and you might just get a gift! Collect 6 to upgrade to a SUPER Stocking."
     },
-    "1673224590": {
-        "shortname": "pistol.semiauto.a.m15",
-        "name": "M15 Semi-Automatic Pistol",
-        "description": "A special issue Air Force semi-automatic pistol, fires rapidly and with good accuracy."
-    },
     "1675639563": {
         "shortname": "hat.beenie",
         "name": "Beenie Hat",
@@ -2204,11 +2109,6 @@
         "name": "Ballista",
         "description": "A stationary ballista, perfect for defence. Can fire deadly bolts at distant targets."
     },
-    "1717250161": {
-        "shortname": "electric.tablelight",
-        "name": "Electric Table Lamp",
-        "description": "A small light source made out of an old oil can."
-    },
     "1719587208": {
         "shortname": "weapon.mod.targetingattachment",
         "name": "Targeting Attachment",
@@ -2247,12 +2147,7 @@
     "1730664641": {
         "shortname": "wallpaper.ceiling",
         "name": "Wallpaper Ceiling",
-        "description": null
-    },
-    "1732236518": {
-        "shortname": "caboose",
-        "name": "Caboose",
-        "description": "Caboose"
+        "description": ""
     },
     "1735402444": {
         "shortname": "discofloor.largetiles",
@@ -2282,7 +2177,7 @@
     "1758333838": {
         "shortname": "rockingchair.rockingchair2",
         "name": "Teal",
-        "description": "A rocking chair that responds to your input. Don't fire whilst seated."
+        "description": ""
     },
     "1762167092": {
         "shortname": "greenidtag",
@@ -2332,7 +2227,7 @@
     "1784406797": {
         "shortname": "fun.tuba",
         "name": "Sousaphone",
-        "description": "A collection of used piping that’s been converted into a Tuba. Probably not very hygienic."
+        "description": "A collection of used piping that’s been converted into a Tuba. Probably not very hygienic.\r"
     },
     "1787198294": {
         "shortname": "frontiermirror.standing",
@@ -2367,7 +2262,7 @@
     "1819863051": {
         "shortname": "skylantern",
         "name": "Sky Lantern",
-        "description": "A set of beautiful sky lanterns. Comes in 5 colors. Can be launched in any direction. Has one inventory slot. Can be Ignited with a lit torch."
+        "description": "A beautiful sky lantern. Can be launched in any direction. Has one inventory slot. Can be Ignited with a lit torch."
     },
     "1827479659": {
         "shortname": "wolfmeat.burned",
@@ -2452,7 +2347,7 @@
     "1878053256": {
         "shortname": "rowboat",
         "name": "Rowboat",
-        "description": null
+        "description": ""
     },
     "1882709339": {
         "shortname": "metalblade",
@@ -2479,11 +2374,6 @@
         "name": "Spooky Speaker",
         "description": "Frighten your guests with creepy and spooky halloween sounds!"
     },
-    "1892536031": {
-        "shortname": "electric.fluorescentlight",
-        "name": "Fluorescent Light",
-        "description": "Bright enough to see what you’re doing."
-    },
     "1895235349": {
         "shortname": "discoball",
         "name": "Disco Ball",
@@ -2502,7 +2392,7 @@
     "1903654061": {
         "shortname": "planter.small",
         "name": "Small Planter Box",
-        "description": "A small planter with enough room to plant 3 seeds."
+        "description": "A small planter with enough room to plant 3 seeds.\r"
     },
     "1905387657": {
         "shortname": "radiationremovetea.pure",
@@ -2572,7 +2462,7 @@
     "1953903201": {
         "shortname": "pistol.nailgun",
         "name": "Nailgun",
-        "description": "A construction tool turned deadly."
+        "description": "A construction tool turned deadly"
     },
     "1954597876": {
         "shortname": "catapult.ammo.bee",
@@ -2762,57 +2652,17 @@
     "2126889441": {
         "shortname": "santabeard",
         "name": "Santa Beard",
-        "description": "A santa beard. Ho Ho ho. This item acts as a hairy bandana."
-    },
-    "2130820932": {
-        "shortname": "charity.plushy.01",
-        "name": "Cancer Research UK Plushie",
-        "description": "A soft and squishy plush that provides comfort in your base. First sold on the Rust store in October 2025 to support Cancer Research UK, each purchase helped fund real-world cancer research.\n\nwww.cancerresearchuk.org"
-    },
-    "2130820933": {
-        "shortname": "charity.plushy.02",
-        "name": "Ronald McDonald House UK Plushie",
-        "description": "A soft and squishy plush that provides comfort in your base. First sold on the Rust store in October 2025 to support Ronald McDonald House Charities UK, helping ease the burden on families by providing free ‘home away from home’ accommodation near hospitals.\n\nwww.rmhc.org.uk"
+        "description": "A santa beard. Ho Ho ho."
     },
     "2133269020": {
         "shortname": "clone.red.berry",
         "name": "Red Berry Clone",
         "description": "A clipping of a Red Berry Plant."
     },
-    "-226151558": {
-        "shortname": "2module car chassis",
-        "name": "2 Module Car Chassis",
-        "description": "2 Module Car Chassis"
-    },
-    "-866121090": {
-        "shortname": "2module car",
-        "name": "2 Module Car",
-        "description": "A motorbike."
-    },
-    "-831725027": {
-        "shortname": "3module car",
-        "name": "3 Module Car",
-        "description": "3 Module Car"
-    },
-    "-935322684": {
-        "shortname": "4module car",
-        "name": "4 Module Car",
-        "description": "4 Module Car"
-    },
-    "-880494890": {
-        "shortname": "abyss.barrel.horizontal",
-        "name": "Abyss Horizontal Storage Tank",
-        "description": "Horizontal Abyss container taken from the depths of the ocean"
-    },
-    "-919882824": {
-        "shortname": "abyss.barrel.vertical",
-        "name": "Abyss Vertical Storage Tank",
-        "description": "Vertical Abyss container taken from the depths of the ocean"
-    },
-    "-1896395719": {
-        "shortname": "advancedblueprintfragment",
-        "name": "Advanced Blueprint Fragment",
-        "description": "Precision schematics with complex information, multiple fragments are necessary for crafting a Tier 3 Workbench."
+    "2137338174": {
+        "shortname": "gates.external.high.frontier",
+        "name": "High External Frontier Gate",
+        "description": "A high wooden gate, allowing access in and out of your compound."
     },
     "-1498613415": {
         "shortname": "advancedcoolingtea",
@@ -3014,11 +2864,6 @@
         "name": "Sandbag Barricade",
         "description": "A protective barricade made out of Sand Bags."
     },
-    "-143481979": {
-        "shortname": "basicblueprintfragment",
-        "name": "Basic Blueprint Fragment",
-        "description": "Damaged diagrams containing partial information to constuct a Tier 2 Workbench for advanced crafting. Several fragments are needed.\n\n20 Basic Fragments can be pieced together to make an Advanced Fragment."
-    },
     "-1274093662": {
         "shortname": "bathtub.planter",
         "name": "Bath Tub Planter",
@@ -3027,7 +2872,7 @@
     "-479314201": {
         "shortname": "batteringram.head.repair",
         "name": "Battering Ram Head",
-        "description": null
+        "description": ""
     },
     "-187304968": {
         "shortname": "batteringram",
@@ -3048,16 +2893,6 @@
         "shortname": "beachtowel",
         "name": "Beach Towel",
         "description": "A colourful beach towel. Placing this will give you a location to respawn."
-    },
-    "-576866254": {
-        "shortname": "beanbagseatfabric",
-        "name": "Fabric Beanbag Seat",
-        "description": "A cozy fabric beanbag seat to sink in to."
-    },
-    "-1220928936": {
-        "shortname": "beanbagseatleather",
-        "name": "Leather Beanbag Seat",
-        "description": "A cozy leather beanbag seat to sink in to."
     },
     "-989755543": {
         "shortname": "bearmeat.burned",
@@ -3159,15 +2994,10 @@
         "name": "Firebomb",
         "description": "A crude firebomb made of fuel-filled jugs wrapped in a net. Can be placed or used as a projectile in a catapult."
     },
-    "-463012608": {
-        "shortname": "chair.ejector.seat",
-        "name": "Salvaged Ejector Seat",
-        "description": "A chair made from an ejector seat. A decorative item which provides comfort while seated. Stays put."
-    },
     "-1944704288": {
         "shortname": "chair.icethrone",
         "name": "Ice Throne",
-        "description": "An Ice Throne. Fit for the one true arctic warlord."
+        "description": "Every home needs a chair. A decorative item which provides comfort while seated."
     },
     "-1938052175": {
         "shortname": "charcoal",
@@ -3244,11 +3074,6 @@
         "name": "Cloth",
         "description": "Cloth from an animal or a Hemp Bush. Used in many clothing items, weapons, and more."
     },
-    "-606898372": {
-        "shortname": "clothing.mannequin",
-        "name": "#clothingmannequin",
-        "description": "#clothing.mannequin.desc"
-    },
     "-903796529": {
         "shortname": "clothing.mod.armorinsert_asbestos",
         "name": "Asbestos Armor Insert",
@@ -3257,7 +3082,7 @@
     "-593892112": {
         "shortname": "clothing.mod.armorinsert_wood",
         "name": "Wooden Armor Insert",
-        "description": "Wood insert for crafted clothes and armor, provides some extra protection from bullets and melee."
+        "description": "Wood insert for crafted clothes and armor, provides some extra protection from bullets and melee. "
     },
     "-582467439": {
         "shortname": "cocoknight.armor.helmet",
@@ -3314,6 +3139,11 @@
         "name": "Tool Cupboard",
         "description": "Placing and authorising with the cupboard will make it so only you can build in a 50 meter radius of it. If you want your friends to build, they'll need to auth too. You should protect this."
     },
+    "-361911645": {
+        "shortname": "dart.bone",
+        "name": "Bone Dart",
+        "description": "A basic damage dart."
+    },
     "-963819285": {
         "shortname": "dart.incapacitate",
         "name": "Incapacitate Dart",
@@ -3357,22 +3187,17 @@
     "-2022172587": {
         "shortname": "diving.tank",
         "name": "Diving Tank",
-        "description": "An oxygen tank that enables breathing under water for a period of time. Can be refilled at a workbench or repair bench."
+        "description": "An oxygen tank that enables breathing under water for a period of time. Can be refilled at a workbench."
     },
     "-1101924344": {
         "shortname": "diving.wetsuit",
         "name": "Wetsuit",
         "description": "A Wetsuit providing protection from frigid waters."
     },
-    "-451310088": {
-        "shortname": "documents",
-        "name": "Documents",
-        "description": "A stack of technical looking documents."
-    },
     "-1151332840": {
         "shortname": "door.double.hinged.bardoors",
         "name": "Wooden Frontier Bar Doors",
-        "description": "A Cheap door to secure your base. Its vulnerability to fire and weak explosive resistance makes the door a temporary solution to securing your base. Due to its flaws you should look at upgrading to a higher tier door such as Sheet Metal.\n\nThe Wooden Door can take two kinds of locks the basic Key Lock and the Code Lock. To pick up the door, remove any locks and open, hold down the E (USE) key and select 'Pickup'."
+        "description": "Hand-carved, rugged bar doors embody the spirit of the frontier. A must-have for any survivor."
     },
     "-1336109173": {
         "shortname": "door.double.hinged.wood",
@@ -3392,7 +3217,7 @@
     "-258574361": {
         "shortname": "draculacape",
         "name": "Dracula Cape",
-        "description": "A Halloween themed replacement for the Vagabond Jacket which flows in the wind."
+        "description": "A robustly thick outer garment providing ample protection to the wearer."
     },
     "-854270928": {
         "shortname": "dragondoorknocker",
@@ -3438,11 +3263,6 @@
         "shortname": "electric.button",
         "name": "Button",
         "description": "A simple electric button."
-    },
-    "-1510616686": {
-        "shortname": "electric.chandelier",
-        "name": "Chandelier",
-        "description": "A large adjustable electric chandelier. Very fancy."
     },
     "-216999575": {
         "shortname": "electric.counter",
@@ -3518,16 +3338,6 @@
         "shortname": "electric.splitter",
         "name": "Splitter",
         "description": "Splits an electrical signal into 3 multiple signals. the amount passed through is equal to the input amount divided by the number of used output slots."
-    },
-    "-1258821205": {
-        "shortname": "electric.spotlight",
-        "name": "Spot Light",
-        "description": "A spotlight you can orient with a hammer."
-    },
-    "-2134097299": {
-        "shortname": "electric.spotlight.tripod",
-        "name": "Tripod Spot Light",
-        "description": "A spotlight you can orient with a hammer."
     },
     "-781014061": {
         "shortname": "electric.sprinkler",
@@ -3737,7 +3547,7 @@
     "-2107018088": {
         "shortname": "fun.bass",
         "name": "Shovel Bass",
-        "description": "Use this stringed together shovel to play some deep, deep tunes."
+        "description": "Use this stringed together shovel to play some deep, deep tunes.\r"
     },
     "-1530414568": {
         "shortname": "fun.casetterecorder",
@@ -3752,7 +3562,7 @@
     "-2040817543": {
         "shortname": "fun.flute",
         "name": "Pan Flute",
-        "description": "A set of repurposed PVC pipes that can be used to play a variety of melodies."
+        "description": "A set of repurposed PVC pipes that can be used to play a variety of melodies.\r"
     },
     "-2124352573": {
         "shortname": "fun.guitar",
@@ -3788,11 +3598,6 @@
         "shortname": "gates.external.high.adobe",
         "name": "High External Adobe Gate",
         "description": "A high stone gate, allowing access in and out of your compound."
-    },
-    "-1442339204": {
-        "shortname": "gates.external.high.legacy",
-        "name": "High External Legacy Gate",
-        "description": "A legacy themed wooden gate to keep the untamed wilderness away from your property, it's seen better days. Replaces the High External Wooden Wall."
     },
     "-691113464": {
         "shortname": "gates.external.high.stone",
@@ -3932,7 +3737,7 @@
     "-1785231475": {
         "shortname": "halloween.surgeonsuit",
         "name": "Surgeon Scrubs",
-        "description": "A bloody surgeon outfit. Protects your entire body and provides good protection while giving off a creepy halloween vibe."
+        "description": "A Surgeon Suit"
     },
     "-1506397857": {
         "shortname": "hammer.salvaged",
@@ -3989,11 +3794,6 @@
         "name": "Hatchet",
         "description": "A Hatchet, useful for chopping trees and dismembering corpses."
     },
-    "-902423513": {
-        "shortname": "hazmat.krieg",
-        "name": "Krieg Hazmat",
-        "description": "A Krieg Hazmat Suit, standard issue for those who never retreat."
-    },
     "-470439097": {
         "shortname": "hazmatsuit.arcticsuit",
         "name": "Arctic Suit",
@@ -4001,8 +3801,8 @@
     },
     "-797592358": {
         "shortname": "hazmatsuit.diver",
-        "name": "Abyss Pack",
-        "description": "A damaged deep-water survival suit was found in the abyss. Although it may no longer serve its original purpose, it functions reliably as a Hazmat suit. Owning this suit also grants access to the Abyss Pickaxe, Abyss Hatchet, Abyss Torch, and Abyss AR."
+        "name": "Abyss Divers Suit",
+        "description": "A divers suit found in the abyss, doubles as a reliable hazmat suit"
     },
     "-105415879": {
         "shortname": "hazmatsuit.frontier",
@@ -4204,21 +4004,6 @@
         "name": "Knights armour skirt plates",
         "description": "A well made set of knights plate that covers the hips and thighs. Made of scrap metal."
     },
-    "-1770281406": {
-        "shortname": "krieg.chainsword",
-        "name": "Krieg chainsword",
-        "description": "A brutal tool of war, roaring to life with every swing."
-    },
-    "-420889602": {
-        "shortname": "krieg.shotgun",
-        "name": "Krieg Shotgun",
-        "description": "Heavy, reliable, and unforgiving. A weapon that never hesitates."
-    },
-    "-874650016": {
-        "shortname": "kriegbackpack",
-        "name": "Krieg Large Backpack",
-        "description": "Carry your essentials in a rugged military pack, built for endurance and practicality."
-    },
     "-316250604": {
         "shortname": "ladder.wooden.wall",
         "name": "Wooden Ladder",
@@ -4236,8 +4021,8 @@
     },
     "-73195037": {
         "shortname": "legacy bow",
-        "name": "Legacy Bow",
-        "description": "Hunting Bow, useful for short to medium range combat and hunting."
+        "name": "Legacy bow",
+        "description": "Legacy Bow, useful for short to medium range combat and hunting."
     },
     "-1310391395": {
         "shortname": "legacyfurnace",
@@ -4262,7 +4047,7 @@
     "-850982208": {
         "shortname": "lock.key",
         "name": "Key Lock",
-        "description": "Place on a door to prevent unwelcome guests. You can create a key to share with your friends, don't let it fall in the wrong hands!"
+        "description": "Place on a door to avoid any unwelcome guests. To craft your key first place the lock on a door and hold E while looking at the Key lock and select 'Create Key', a key will now be added to your crafting queue.\n\nIf the key is lost, you cannot make another, so don't forget to make extras and put them in a safe place!"
     },
     "-110921842": {
         "shortname": "locker",
@@ -4318,11 +4103,6 @@
         "shortname": "mailbox",
         "name": "Mail Box",
         "description": "A Mailbox that accepts notes. Only you can access the mail due to a one way slit."
-    },
-    "-1035206446": {
-        "shortname": "mannequin",
-        "name": "Clothing Mannequin",
-        "description": "Displays a set of clothing, quickly remove items off your player onto the Mannequin. Goes by Manny."
     },
     "-2012470695": {
         "shortname": "mask.balaclava",
@@ -4384,11 +4164,6 @@
         "name": "Metal Spring",
         "description": "A metal spring. Used to provide motion or resistance in objects."
     },
-    "-1334255764": {
-        "shortname": "minicopter",
-        "name": "Minicopter",
-        "description": "Minicopter"
-    },
     "-482348853": {
         "shortname": "minicrossbow",
         "name": "Mini Crossbow",
@@ -4417,7 +4192,7 @@
     "-2047081330": {
         "shortname": "movembermoustache",
         "name": "Movember Moustache",
-        "description": "A magnificent moustache (it acts as a hairy bandana) - all proceeds go to Movember, a charity promoting men's health awareness,"
+        "description": "A magnificent moustache for Movember"
     },
     "-1123473824": {
         "shortname": "multiplegrenadelauncher",
@@ -4612,7 +4387,7 @@
     "-92315244": {
         "shortname": "revolver.hc",
         "name": "High Caliber Revolver",
-        "description": "High Caliber Revolver"
+        "description": "A powerful six-shot revolver using 5.56 rounds. High damage and accuracy, but slow fire rate and even slower to reload."
     },
     "-566907190": {
         "shortname": "rf_pager",
@@ -4651,7 +4426,7 @@
     },
     "-699558439": {
         "shortname": "roadsign.gloves",
-        "name": "Road Sign Gloves",
+        "name": "Roadsign Gloves",
         "description": "Gloves made out of metal, offer a good amount of protection to the upper body."
     },
     "-2002277461": {
@@ -4782,12 +4557,7 @@
     "-1884328185": {
         "shortname": "scraptransportheli.repair",
         "name": "Scrap Transport Helicopter",
-        "description": null
-    },
-    "-374457631": {
-        "shortname": "sedan",
-        "name": "Sedan",
-        "description": "Sedan"
+        "description": ""
     },
     "-1776128552": {
         "shortname": "seed.green.berry",
@@ -4962,7 +4732,7 @@
     "-216116642": {
         "shortname": "skulldoorknocker",
         "name": "Skull Door Knocker",
-        "description": "A spooky heavy iron door knocker. Its haunted skull will produce flames when distrubed."
+        "description": "A spooky skull door knocker"
     },
     "-25740268": {
         "shortname": "skullspikes.candles",
@@ -4982,17 +4752,17 @@
     "-1770889433": {
         "shortname": "skylantern.skylantern.green",
         "name": "Sky Lantern - Green",
-        "description": "#skylantern.skylantern.green.desc"
+        "description": ""
     },
     "-1824770114": {
         "shortname": "skylantern.skylantern.orange",
         "name": "Sky Lantern - Orange",
-        "description": "#skylantern.skylantern.orange.desc"
+        "description": ""
     },
     "-1433390281": {
         "shortname": "skylantern.skylantern.red",
         "name": "Sky Lantern - Red",
-        "description": "#skylantern.skylantern.red.desc"
+        "description": ""
     },
     "-333406828": {
         "shortname": "sled",
@@ -5094,14 +4864,9 @@
         "name": "Wooden Floor Spikes",
         "description": "A set of spikes that will slow down and hurt anyone that walks over them."
     },
-    "-1850297170": {
-        "shortname": "spikes.trap",
-        "name": "Small Spike Trap",
-        "description": "A small improvised trap that injures and slows anyone who steps on it."
-    },
     "-1100422738": {
         "shortname": "spinner.wheel",
-        "name": "Spinning Wheel",
+        "name": "Spinning wheel",
         "description": "An interactive spinning wheel."
     },
     "-596876839": {
@@ -5112,7 +4877,7 @@
     "-1366326648": {
         "shortname": "spraycandecal",
         "name": "Spray Can Decal",
-        "description": null
+        "description": ""
     },
     "-369760990": {
         "shortname": "stash.small",
@@ -5247,7 +5012,7 @@
     "-561148628": {
         "shortname": "tugboat",
         "name": "Tugboat",
-        "description": null
+        "description": ""
     },
     "-1478445584": {
         "shortname": "tunalight",
@@ -5344,11 +5109,6 @@
         "name": "High Ice Wall",
         "description": "A very high ice wall to protect your property."
     },
-    "-1993883724": {
-        "shortname": "wall.external.high.legacy",
-        "name": "High External Legacy Wall",
-        "description": "A legacy themed wooden wall to keep the untamed wilderness away from your property, made with questionable carpentry. Replaces the High External Wooden Wall."
-    },
     "-967648160": {
         "shortname": "wall.external.high.stone",
         "name": "High External Stone Wall",
@@ -5376,12 +5136,12 @@
     },
     "-450890885": {
         "shortname": "wall.frame.lunar2025_b",
-        "name": "Wall Divider Pack",
+        "name": "Lunar Wall Frame Swirling",
         "description": "A Lunar New Year themed decorative wall divider with swirling inlay"
     },
     "-2016974826": {
         "shortname": "wall.frame.lunar2025_c",
-        "name": "Wall Divider Pack",
+        "name": "Lunar Wall Frame Floral",
         "description": "A Lunar New Year themed decorative wall divider with floral inlay"
     },
     "-796583652": {
@@ -5412,12 +5172,17 @@
     "-1614955425": {
         "shortname": "wall.window.glass.reinforced",
         "name": "Strengthened Glass Window",
-        "description": "Strengthened Glass Window"
+        "description": "Bulletproof glass insert"
     },
     "-551431036": {
         "shortname": "wallpaper.flooring",
         "name": "Wallpaper Flooring",
-        "description": null
+        "description": ""
+    },
+    "-1501434104": {
+        "shortname": "wallpaper",
+        "name": "Wallpaper",
+        "description": "Transform your base from a rusty shack to a cozy hideout with this sleek wallpaper. A nice touch of style - until the next raid, at least."
     },
     "-1344017968": {
         "shortname": "wantedposter",
@@ -5567,7 +5332,7 @@
     "-1497205569": {
         "shortname": "woodmirror.small",
         "name": "Wood Mirror Small",
-        "description": "A small wooden frame"
+        "description": "A small wooden mirror"
     },
     "-541206665": {
         "shortname": "woodtea.advanced",
@@ -5632,7 +5397,7 @@
     "-151387974": {
         "shortname": "xmas.lightstring.advanced",
         "name": "Deluxe Christmas Lights",
-        "description": "Colored, animated, powered Lights that can be deployed point by point to light up your base."
+        "description": "Colored, Animated, Powered Lights. Requires 5 electricity. Click to start placement, right click to end. Each unit is 0.5m long."
     },
     "-1622660759": {
         "shortname": "xmas.present.large",
@@ -5653,5 +5418,15 @@
         "shortname": "xylophone",
         "name": "Xylobone",
         "description": "A selection of bones that were “acquired” for their acoustic attributes. Play a lullaby for your camp with these soothing tones."
+    },
+    "-143481979": {
+        "shortname": "basicblueprintfragment",
+        "name": "Basic Blueprint Fragment",
+        "description": "Damaged diagrams containing partial information to constuct a Tier 2 Workbench for advanced crafting. Several fragments are needed. 20 Basic Fragments can be pieced together to make an Advanced Fragment."
+    },
+    "-1896395719": {
+        "shortname": "advancedblueprintfragment",
+        "name": "Advanced Blueprint Fragment",
+        "description": "Precision schematics with complex information, multiple fragments are necessary for crafting a Tier 3 Workbench."
     }
 }

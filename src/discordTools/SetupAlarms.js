@@ -20,6 +20,7 @@
 
 const DiscordMessages = require('./discordMessages.js');
 
+
 module.exports = async (client, rustplus) => {
     const instance = client.getInstance(rustplus.guildId);
     const guildId = rustplus.guildId;
@@ -39,7 +40,15 @@ module.exports = async (client, rustplus) => {
             entity.reachable = true;
         }
 
-        if (entity.reachable) entity.active = info.entityInfo.payload.value;
+        // Defensive: payload may be missing even when response is considered valid
+        const payload = info && info.entityInfo && info.entityInfo.payload ? info.entityInfo.payload : null;
+        if (entity.reachable) {
+            if (!payload) {
+                try { rustplus.log('WARNING', `SetupAlarms: missing payload for alarm entity ${entityId}`,'warning'); } catch (e) { /* ignore logging errors */ }
+            } else {
+                entity.active = payload.value;
+            }
+        }
 
         client.setInstance(guildId, instance);
 

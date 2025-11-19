@@ -425,7 +425,9 @@ module.exports = {
 
             rustplus.sendInGameMessage(client.intlGet(guildId, 'deviceIsCurrentlyOnOff', {
                 device: switches[entityId].name,
-                status: info.entityInfo.payload.value ? onCap : offCap
+                status: (info && info.entityInfo && info.entityInfo.payload)
+                    ? (info.entityInfo.payload.value ? onCap : offCap)
+                    : (switches[entityId].active ? onCap : offCap)
             }));
             return true;
         }
