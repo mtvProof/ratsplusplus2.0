@@ -483,17 +483,13 @@ async function doUpdate(guildId, serverId){
   // Collect totals from main loot room (Resources, Components, Teas boxes)
   if (mainLootConnected.length) addFromToAll(mainLootConnected, totals);
 
-  // Format bunker contents - list all items in each bunker
+  // Format bunker contents - combine all bunker items into one total
   const formatBunkerContents = () => {
     if (bunkerConnected.length === 0) return NO_CONNECTED;
     
-    const bunkerSections = [];
+    const allItems = {};
     for (const bunkerId of bunkerConnected) {
       const live = rp.storageMonitors[bunkerId];
-      const mon = smMap[bunkerId];
-      const boxName = mon?.name || `Bunker-${bunkerId}`;
-      
-      const items = {};
       for (const it of live.items) {
         let display = '';
         if (it.itemId !== undefined && it.itemId !== null){
@@ -503,23 +499,19 @@ async function doUpdate(guildId, serverId){
         }
         const itemName = display || 'Unknown';
         const qty = Number(it.quantity ?? it.amount ?? it.qty ?? it.count ?? 0);
-        items[itemName] = (items[itemName] || 0) + qty;
-      }
-      
-      let itemsList = [];
-      for (const [name, qty] of Object.entries(items).sort((a, b) => a[0].localeCompare(b[0]))) {
-        const shortName = DISPLAY_ALIAS[name] || name;
-        itemsList.push(`${shortName}: ${fmtNum(qty)}`);
-      }
-      
-      if (itemsList.length > 0) {
-        bunkerSections.push(`**${boxName}**\n${itemsList.join('\n')}`);
-      } else {
-        bunkerSections.push(`**${boxName}**\n\`Empty\``);
+        allItems[itemName] = (allItems[itemName] || 0) + qty;
       }
     }
     
-    return bunkerSections.join('\n\n');
+    if (Object.keys(allItems).length === 0) return '`Empty`';
+    
+    const itemsList = [];
+    for (const [name, qty] of Object.entries(allItems).sort((a, b) => a[0].localeCompare(b[0]))) {
+      const shortName = DISPLAY_ALIAS[name] || name;
+      itemsList.push(`${shortName}: ${fmtNum(qty)}`);
+    }
+    
+    return '```\n' + itemsList.join('\n') + '\n```';
   };
 
   // Build embed – prefer totals if present; otherwise show NO_CONNECTED
