@@ -398,16 +398,16 @@ async function doUpdate(guildId, serverId){
   const smMap = server.storageMonitors || server.storagemonitors || {};
   const resIds   = [];
   const compIds  = [];
-  const boomIds  = [];
-  const bunkerIds= []; // ← NEW
+  const teasIds  = [];
+  const bunkerIds= [];
 
   for (const [entityId, mon] of Object.entries(smMap)) {
     if (!mon?.name) continue;
     const bucket = norm(mon.name);
     if (bucket === 'resources')      resIds.push(entityId);
     else if (bucket === 'components') compIds.push(entityId);
-    else if (bucket === 'boom')       boomIds.push(entityId);
-    else if (bucket === 'bunker')     bunkerIds.push(entityId);  // ← NEW
+    else if (bucket === 'teas')       teasIds.push(entityId);
+    else if (bucket === 'bunker')     bunkerIds.push(entityId);
   }
 
 
@@ -419,20 +419,19 @@ async function doUpdate(guildId, serverId){
 
   const resConnected  = resIds.filter(isConnected);
   const compConnected = compIds.filter(isConnected);
-  const boomConnected = boomIds.filter(isConnected);
-  const bunkerConnected = bunkerIds.filter(isConnected); // ← NEW
+  const teasConnected = teasIds.filter(isConnected);
+  const bunkerConnected = bunkerIds.filter(isConnected);
 
-    // Union of all watched boxes (resources/components/boom/bunker)
-  const watchedConnected = Array.from(new Set([
-    ...resConnected, ...compConnected, ...boomConnected, ...bunkerConnected
+  // Main loot room boxes (Resources, Components, Teas combined)
+  const mainLootConnected = Array.from(new Set([
+    ...resConnected, ...compConnected, ...teasConnected
   ]));
 
 
   // Tally from live data only
-const totals = {
+  const totals = {
     resources: Object.fromEntries(RESOURCE_KEYS.map(k => [k, 0])),
     components: Object.fromEntries(COMPONENT_KEYS.map(k => [k, 0])),
-    boom:       Object.fromEntries(BOOM_KEYS.map(k => [k, 0])),
     teas:       Object.fromEntries(TEA_KEYS.map(k => [k, 0])),
   };
 
@@ -454,8 +453,8 @@ const totals = {
     }
   };
 
-    // Route items from ids into the correct category totals by name.
-const addFromToAll = (ids, totalsAll) => {
+  // Route items from main loot room boxes into the correct category totals by name
+  const addFromToAll = (ids, totalsAll) => {
     for (const id of ids) {
       const live = rp.storageMonitors[id];
       for (const it of live.items) {
@@ -470,53 +469,83 @@ const addFromToAll = (ids, totalsAll) => {
 
         if (RESOURCE_SET.has(can))       totalsAll.resources[can]  += qty;
         else if (COMPONENT_SET.has(can)) totalsAll.components[can] += qty;
-        else if (BOOM_SET.has(can))      totalsAll.boom[can]       += qty;
         else if (TEA_SET.has(can))       totalsAll.teas[can]       += qty;
         // else: ignore items that aren't tracked
       }
     }
   };
 
+  // Collect totals from main loot room (Resources, Components, Teas boxes)
+  if (mainLootConnected.length) addFromToAll(mainLootConnected, totals);
 
+  // Format bunker contents - list all items in each bunker
+  const formatBunkerContents = () => {
+    if (bunkerConnected.length === 0) return NO_CONNECTED;
+    
+    const bunkerSections = [];
+    for (const bunkerId of bunkerConnected) {
+      const live = rp.storageMonitors[bunkerId];
+      const mon = smMap[bunkerId];
+      const boxName = mon?.name || `Bunker-${bunkerId}`;
+      
+      const items = {};
+      for (const it of live.items) {
+        let display = '';
+        if (it.itemId !== undefined && it.itemId !== null){
+          try { display = client.items.getName(it.itemId) || ''; } catch { display = ''; }
+        } else {
+          display = it.name || it.displayName || it.title || it.shortname || '';
+        }
+        const itemName = display || 'Unknown';
+        const qty = Number(it.quantity ?? it.amount ?? it.qty ?? it.count ?? 0);
+        items[itemName] = (items[itemName] || 0) + qty;
+      }
+      
+      let itemsList = [];
+      for (const [name, qty] of Object.entries(items).sort((a, b) => a[0].localeCompare(b[0]))) {
+        const shortName = DISPLAY_ALIAS[name] || name;
+        itemsList.push(`${shortName}: ${fmtNum(qty)}`);
+      }
+      
+      if (itemsList.length > 0) {
+        bunkerSections.push(`**${boxName}**\n${itemsList.join('\n')}`);
+      } else {
+        bunkerSections.push(`**${boxName}**\n\`Empty\``);
+      }
+    }
+    
+    return bunkerSections.join('\n\n');
+  };
 
-  // NEW: route items by *item* category from ANY watched box
-  if (watchedConnected.length) addFromToAll(watchedConnected, totals);
-
-
-
-// Build embed – prefer totals if present; otherwise show NO_CONNECTED
+  // Build embed – prefer totals if present; otherwise show NO_CONNECTED
   const resHas  = hasAnyTotals(totals.resources);
   const compHas = hasAnyTotals(totals.components);
-  const boomHas = hasAnyTotals(totals.boom);
   const teasHas = hasAnyTotals(totals.teas);
 
-  const hasAnyWatched = watchedConnected.length > 0;
+  const hasMainLoot = mainLootConnected.length > 0;
 
-  const resourcesField = hasAnyWatched && resHas
+  const resourcesField = hasMainLoot && resHas
     ? formatLinesWithLimits(totals.resources, RESOURCE_KEYS, mrc.limits)
-    : (hasAnyWatched ? '`—`' : NO_CONNECTED);
+    : (hasMainLoot ? '`—`' : NO_CONNECTED);
 
-  const componentsField = hasAnyWatched && compHas
+  const componentsField = hasMainLoot && compHas
     ? formatLinesWithLimits(totals.components, COMPONENT_KEYS, mrc.limits)
-    : (hasAnyWatched ? '`—`' : NO_CONNECTED);
+    : (hasMainLoot ? '`—`' : NO_CONNECTED);
 
-  const boomField = hasAnyWatched && boomHas
-    ? formatLinesWithLimits(totals.boom, BOOM_KEYS, mrc.limits)
-    : (hasAnyWatched ? '`—`' : NO_CONNECTED);
-
-  const teasField = hasAnyWatched && teasHas
+  const teasField = hasMainLoot && teasHas
     ? formatLinesWithLimits(totals.teas, TEA_KEYS, mrc.limits)
-    : (hasAnyWatched ? '`—`' : NO_CONNECTED);
+    : (hasMainLoot ? '`—`' : NO_CONNECTED);
 
+  const bunkersField = formatBunkerContents();
 
   const embed = buildEmbed({
-    title: 'Main Resources & Comps',
+    title: 'Main Loot Room & Bunkers',
     color: Constants.COLOR_DEFAULT,
     fields: [
-      { name: 'Resources (Totals)',  value: resourcesField,  inline: true },
-      { name: 'Components (Totals)', value: componentsField, inline: true },
-      { name: 'Boom (Totals)',       value: boomField,       inline: false },
-      { name: 'Teas (Totals)',       value: teasField,       inline: false },
+      { name: 'Resources (Main Loot)',  value: resourcesField,  inline: true },
+      { name: 'Components (Main Loot)', value: componentsField, inline: true },
+      { name: 'Teas (Main Loot)',       value: teasField,       inline: false },
+      { name: 'Bunkers',                value: bunkersField,    inline: false },
     ],
     timestamp: true
   });
