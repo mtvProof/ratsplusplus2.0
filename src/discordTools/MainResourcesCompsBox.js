@@ -264,13 +264,21 @@ function hasAnyTotals(obj){
 
 
 /* ------------------------------------------------------------------ */
-/* Channel resolver (prefer #information, no auto-create)              */
+/* Channel resolver (prefer stored ID, then search by name)            */
 /* ------------------------------------------------------------------ */
 async function getInformationsChannel(client, guildId, preferredNames = ['information','informations','info']) {
   const instance = client.getInstance(guildId);
   let guild = client.guilds.cache.get(guildId) || await client.guilds.fetch(guildId).catch(() => null);
   if (!guild) return null;
 
+  // First priority: use the stored channel ID from instance.channelId.information
+  const savedId = instance.channelId?.information || instance.channelId?.informations;
+  if (savedId) {
+    const saved = client.channels.cache.get(savedId) || await guild.channels.fetch(savedId).catch(() => null);
+    if (saved && saved.type === Discord.ChannelType.GuildText) return saved;
+  }
+
+  // Fallback: search by channel name
   let ch = guild.channels.cache.find(
     c => c?.type === Discord.ChannelType.GuildText && preferredNames.includes(norm(c.name))
   );
@@ -281,16 +289,11 @@ async function getInformationsChannel(client, guildId, preferredNames = ['inform
   }
   if (ch) {
     instance.channelId = instance.channelId || {};
-    instance.channelId.informations = ch.id; // store here for reuse
+    instance.channelId.information = ch.id; // store here for reuse
     client.setInstance(guildId, instance);
     return ch;
   }
 
-  const savedId = instance.channelId?.informations || instance.channelId?.information;
-  if (savedId) {
-    const saved = client.channels.cache.get(savedId) || await guild.channels.fetch(savedId).catch(() => null);
-    if (saved && saved.type === Discord.ChannelType.GuildText) return saved;
-  }
   return null;
 }
 
