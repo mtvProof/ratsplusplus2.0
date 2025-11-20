@@ -35,7 +35,31 @@ const client = new DiscordBot({
         Discord.GatewayIntentBits.GuildVoiceStates],
     retryLimit: 2,
     restRequestTimeout: 60000,
-    disableEveryone: false
+    disableEveryone: false,
+    // Memory leak fix: Limit caches to prevent infinite growth
+    makeCache: Discord.Options.cacheWithLimits({
+        MessageManager: 200,        // Keep last 200 messages per channel
+        GuildMemberManager: 200,    // Keep up to 200 members cached
+        UserManager: 200,           // Keep up to 200 users cached
+        PresenceManager: 0,         // Don't cache presence data (online/offline status)
+        ReactionManager: 0,         // Don't cache reactions
+        ReactionUserManager: 0,     // Don't cache reaction users
+        ThreadManager: 50,          // Keep up to 50 threads
+        ThreadMemberManager: 0,     // Don't cache thread members
+        StageInstanceManager: 0,    // Don't cache stage instances
+        GuildInviteManager: 0,      // Don't cache invites
+        VoiceStateManager: 200      // Keep voice states (needed for voice features)
+    }),
+    sweepers: {
+        messages: {
+            interval: 300,          // Sweep every 5 minutes
+            lifetime: 1800          // Remove messages older than 30 minutes
+        },
+        users: {
+            interval: 600,          // Sweep every 10 minutes
+            filter: () => (user: any) => user.bot && user.id !== client.user.id  // Keep non-bot users
+        }
+    }
 });
 
 client.build();
