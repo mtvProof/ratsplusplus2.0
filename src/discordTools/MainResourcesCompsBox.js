@@ -572,7 +572,7 @@ async function doUpdate(guildId, serverId){
       const mine = recent.filter(m =>
         m.author?.id === client.user?.id &&
         Array.isArray(m.embeds) &&
-        m.embeds[0]?.title === 'Main Resources & Comps'
+        (m.embeds[0]?.title === 'Main Loot Room & Bunkers' || m.embeds[0]?.title === 'Main Resources & Comps')
       );
       if (mine.size > 0) {
         const sorted = [...mine.values()].sort((a, b) => b.createdTimestamp - a.createdTimestamp);
