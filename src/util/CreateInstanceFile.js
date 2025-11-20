@@ -213,13 +213,15 @@ module.exports = (client, guild) => {
     if (!content.hasOwnProperty('playtime')) {
         content.playtime = {
             totals: {},        // steamId -> seconds (accumulated active time only)
-            onlineSince: {},   // steamId -> epoch ms (session start)
+            onlineSince: {},   // steamId -> epoch ms (active time tracking start)
+            sessionStart: {},  // steamId -> epoch ms (full session start for display)
             afkSince: {},      // steamId -> epoch ms (when they went AFK)
             resetKey: null     // seed:salt:size for wipe detection
         };
     } else {
         if (!content.playtime.hasOwnProperty('totals')) content.playtime.totals = {};
         if (!content.playtime.hasOwnProperty('onlineSince')) content.playtime.onlineSince = {};
+        if (!content.playtime.hasOwnProperty('sessionStart')) content.playtime.sessionStart = {};
         if (!content.playtime.hasOwnProperty('afkSince')) content.playtime.afkSince = {};
         if (!content.playtime.hasOwnProperty('resetKey')) content.playtime.resetKey = null;
     }
