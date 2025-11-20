@@ -50,7 +50,10 @@ class Team {
     set allOffline(allOffline) { this._allOffline = allOffline; }
 
     /* Change checkers */
-    isLeaderSteamIdChanged(team) { return (this.leaderSteamId !== team.leaderSteamId.toString()); }
+    isLeaderSteamIdChanged(team) { 
+        if (!team || !team.leaderSteamId) return false;
+        return (this.leaderSteamId !== team.leaderSteamId.toString()); 
+    }
 
     updateTeam(team) {
         const instance = getClient().getInstance(this.rustplus.guildId);

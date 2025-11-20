@@ -24,19 +24,24 @@ const DiscordMessages = require('../discordTools/discordMessages.js');
 module.exports = {
     handler: async function (rustplus, client, teamInfo) {
         /* Handle team changes */
+        if (!teamInfo || !teamInfo.teamInfo) {
+            return; // Skip if team data is invalid during reconnect
+        }
         await module.exports.checkChanges(rustplus, client, teamInfo);
     },
 
     checkChanges: async function (rustplus, client, teamInfo) {
+        if (!teamInfo || !teamInfo.teamInfo) return; // Additional safety check
+        
         let instance = client.getInstance(rustplus.guildId);
         const guildId = rustplus.guildId;
         const serverId = rustplus.serverId;
         const server = instance.serverList[serverId];
 
-        if (rustplus.team.isLeaderSteamIdChanged(teamInfo)) return;
+        if (rustplus.team.isLeaderSteamIdChanged(teamInfo.teamInfo)) return;
 
-        const newPlayers = rustplus.team.getNewPlayers(teamInfo);
-        const leftPlayers = rustplus.team.getLeftPlayers(teamInfo);
+        const newPlayers = rustplus.team.getNewPlayers(teamInfo.teamInfo);
+        const leftPlayers = rustplus.team.getLeftPlayers(teamInfo.teamInfo);
 
         for (const steamId of leftPlayers) {
             const player = rustplus.team.getPlayer(steamId);
