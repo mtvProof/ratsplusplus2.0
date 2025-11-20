@@ -939,13 +939,14 @@ getUpdateTeamInformationEmbed: function (rustplus) {
 
 
   // ---- Playtime state (per server) ----
-  server.playtime = server.playtime || { totals: {}, onlineSince: {}, resetKey: null };
+  server.playtime = server.playtime || { totals: {}, onlineSince: {}, afkSince: {}, resetKey: null };
 
   // Reset on wipe by comparing map identity (seed/salt/size)
   const newKey = computeResetKey(rustplus);
   if (newKey && server.playtime.resetKey && server.playtime.resetKey !== newKey) {
     server.playtime.totals = {};
     server.playtime.onlineSince = {};
+    server.playtime.afkSince = {};
   }
   if (!server.playtime.resetKey || server.playtime.resetKey !== newKey) {
     server.playtime.resetKey = newKey || null;
@@ -954,6 +955,7 @@ getUpdateTeamInformationEmbed: function (rustplus) {
   const nowMs = Date.now();
   const totals = server.playtime.totals;
   const onlineSince = server.playtime.onlineSince;
+  const afkSince = server.playtime.afkSince;
 
   const title = getClient().intlGet(guildId, 'teamMemberInfo');
   const teamMemberFieldName = getClient().intlGet(guildId, 'teamMember');
@@ -984,13 +986,40 @@ const isOnline = !!player.isOnline;
 
 // ensure playtime state entries exist
 if (!(steamId in totals)) totals[steamId] = 0;
-if (isOnline && !onlineSince[steamId]) {
-  onlineSince[steamId] = nowMs; // session start
-}
-if (!isOnline && onlineSince[steamId]) {
-  const delta = Math.max(0, Math.floor((nowMs - onlineSince[steamId]) / 1000));
-  totals[steamId] += delta;
-  delete onlineSince[steamId];
+
+// Handle online/offline transitions and AFK tracking
+if (isOnline) {
+  const isAfk = player.getAfkSeconds() >= Constants.AFK_TIME_SECONDS;
+  
+  // Just came online
+  if (!onlineSince[steamId]) {
+    onlineSince[steamId] = nowMs;
+    delete afkSince[steamId]; // Clear any old AFK state
+  }
+  
+  // AFK state changes
+  if (isAfk && !afkSince[steamId]) {
+    // Just went AFK - add active time up to this point
+    const activeDelta = Math.max(0, Math.floor((nowMs - onlineSince[steamId]) / 1000));
+    totals[steamId] += activeDelta;
+    afkSince[steamId] = nowMs;
+    onlineSince[steamId] = nowMs; // Reset online timer to now
+  } else if (!isAfk && afkSince[steamId]) {
+    // Just returned from AFK - don't count AFK time, just reset timer
+    delete afkSince[steamId];
+    onlineSince[steamId] = nowMs; // Restart active time tracking
+  }
+} else {
+  // Just went offline
+  if (onlineSince[steamId]) {
+    // Add any remaining active time (not AFK time)
+    if (!afkSince[steamId]) {
+      const activeDelta = Math.max(0, Math.floor((nowMs - onlineSince[steamId]) / 1000));
+      totals[steamId] += activeDelta;
+    }
+    delete onlineSince[steamId];
+    delete afkSince[steamId];
+  }
 }
 
 // emojis + session/afk/offline time
@@ -1002,19 +1031,19 @@ if (isOnline) {
   status += (player.isAlive) ? ((isAfk) ? Constants.SLEEPING_EMOJI : Constants.ALIVE_EMOJI) : Constants.DEAD_EMOJI;
   status += isPaired ? Constants.PAIRED_EMOJI : '';
 
-  // NEW: explicit online session timer
+  // Calculate session time (online time regardless of AFK)
   let sessionSeconds = 0;
-  if (onlineSince[steamId]) sessionSeconds = Math.max(0, Math.floor((nowMs - onlineSince[steamId]) / 1000));
-  const sessionShort = formatShortSeconds(sessionSeconds);
+  if (onlineSince[steamId]) {
+    sessionSeconds = Math.max(0, Math.floor((nowMs - onlineSince[steamId]) / 1000));
+  }
 
-  // Keep AFK time (if AFK) AND show session time distinctly
-  // Examples:
-  //  🟢💤 1h5m • ON: 2h40m
-  //  🟢🙂 • ON: 35m
   if (isAfk) {
-    status += ` ${afkTime} • ON: ${sessionShort}`;
+    // Show AFK duration
+    status += ` ${afkTime}`;
   } else {
-    status += ` • ON: ${sessionShort}`;
+    // Show active session time
+    const sessionShort = formatPlaytimeShort(sessionSeconds);
+    status += ` ${sessionShort}`;
   }
 } else {
   // offline branch (keep your original offline duration)
@@ -1025,16 +1054,18 @@ if (isOnline) {
   status += (offlineTime !== null) ? ` ${offlineTime}` : '';
 }
 
-// ---- Wipe TOTAL playtime (WT) appended at end of status line) ----
+// ---- Wipe TOTAL playtime (active time only, in brackets) ----
 let shownSeconds = totals[steamId];
-if (isOnline && onlineSince[steamId]) {
-  shownSeconds += Math.max(0, Math.floor((nowMs - onlineSince[steamId]) / 1000));
+// If currently online and active (not AFK), add current session active time
+if (isOnline && onlineSince[steamId] && !afkSince[steamId]) {
+  const currentActive = Math.max(0, Math.floor((nowMs - onlineSince[steamId]) / 1000));
+  shownSeconds += currentActive;
 }
 const wipeTotalShort = formatPlaytimeShort(shownSeconds);
 
-// ensure status ends with exactly one newline after appending WT
+// Append total in brackets
 status = status.replace(/\n?$/, '');
-status += ` • _T: ${wipeTotalShort}_\n`;
+status += ` (${wipeTotalShort})\n`;
 // Location column
     const location = (player.isOnline || player.isAlive) ? `${player.pos.string}\n` : '-\n';
 
