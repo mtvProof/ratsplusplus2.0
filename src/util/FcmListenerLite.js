@@ -366,7 +366,7 @@ async function pairingEntitySmartAlarm(client, guild, title, message, body) {
         }
 
         const teamInfo = await rustplus.getTeamInfoAsync();
-        if (await rustplus.isResponseValid(teamInfo)) {
+        if (await rustplus.isResponseValid(teamInfo) && teamInfo.teamInfo?.members) {
             const player = teamInfo.teamInfo.members.find(e => e.steamId.toString() === body.playerId);
             if (player) {
                 const location = Map.getPos(player.x, player.y, rustplus.info.correctedMapSize, rustplus);
