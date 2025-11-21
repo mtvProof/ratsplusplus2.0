@@ -780,9 +780,6 @@ module.exports = {
     const timeFieldName = getClient().intlGet(guildId, 'time');
     const wipeFieldName = getClient().intlGet(guildId, 'wipe');
     const mapSizeFieldName = getClient().intlGet(guildId, 'mapSize');
-    const mapSeedFieldName = getClient().intlGet(guildId, 'mapSeed');
-    const mapSaltFieldName = getClient().intlGet(guildId, 'mapSalt');
-    const mapFieldName = getClient().intlGet(guildId, 'map');
 
     const embed = getEmbed({
       title: getClient().intlGet(guildId, 'serverInfo'),
@@ -808,10 +805,7 @@ module.exports = {
     }
 
     embed.addFields(
-      { name: mapSizeFieldName, value: `\`${rustplus.info.mapSize}\``, inline: true },
-      { name: mapSeedFieldName, value: `\`${rustplus.info.seed}\``, inline: true },
-      { name: mapSaltFieldName, value: `\`${rustplus.info.salt}\``, inline: true },
-      { name: mapFieldName, value: `\`${rustplus.info.map}\``, inline: true }
+      { name: mapSizeFieldName, value: `\`${rustplus.info.mapSize}\``, inline: true }
     );
 
     // --- TC upkeep summary (Tool Cupboard storage monitors) ---
