@@ -146,7 +146,7 @@ module.exports = async (client, guild, steamId) => {
         case 'player': {
           switch (body.type) {
             case 'death': {
-              // Player death notification - processing silently
+              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, player: death`);
               playerDeath(client, guild, title, message, body, discordUserId);
               break;
             }
