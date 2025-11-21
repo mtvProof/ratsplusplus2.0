@@ -226,6 +226,11 @@ module.exports = (client, guild) => {
         if (!content.playtime.hasOwnProperty('resetKey')) content.playtime.resetKey = null;
     }
 
+    // --- Offline timestamps (per server) ---
+    if (!content.hasOwnProperty('offlineTimestamps')) {
+        content.offlineTimestamps = {}; // steamId -> epoch ms (when they went offline)
+    }
+
     }
 
     client.setInstance(guild.id, instance);

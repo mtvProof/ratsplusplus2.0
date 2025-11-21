@@ -123,7 +123,16 @@ class Team {
     addPlayer(player) {
         /* Add player if it does not already exist */
         if (!this.players.some(e => e.steamId === player.steamId)) {
-            this.players.push(new Player(player, this.rustplus));
+            const newPlayer = new Player(player, this.rustplus);
+            
+            // Restore offline timestamp if saved (survives bot restarts)
+            const instance = getClient().getInstance(this.rustplus.guildId);
+            const server = instance.serverList[this.rustplus.serverId];
+            if (server?.offlineTimestamps?.[player.steamId]) {
+                newPlayer.wentOfflineTime = new Date(server.offlineTimestamps[player.steamId]);
+            }
+            
+            this.players.push(newPlayer);
         }
     }
 

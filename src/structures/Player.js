@@ -22,6 +22,10 @@ const Constants = require('../util/constants.js');
 const Map = require('../util/map.js');
 const Time = require('../util/timer.js');
 
+let getClient;
+try { getClient = require('../utils/getClient'); }
+catch { getClient = require('../util/getClient'); }
+
 class Player {
     constructor(player, rustplus) {
         this._steamId = player.steamId.toString();
@@ -105,11 +109,28 @@ class Player {
     updatePlayer(player) {
         if (this.isGoneOffline(player)) {
             this.wentOfflineTime = new Date();
+            
+            // Persist offline timestamp to survive bot restarts
+            const instance = getClient().getInstance(this.rustplus.guildId);
+            const server = instance.serverList[this.rustplus.serverId];
+            if (server) {
+                if (!server.offlineTimestamps) server.offlineTimestamps = {};
+                server.offlineTimestamps[this.steamId] = this.wentOfflineTime.getTime();
+                getClient().setInstance(this.rustplus.guildId, instance);
+            }
         }
 
         if (this.isGoneOnline(player)) {
             this.lastMovement = new Date();
             this.afkSeconds = 0;
+            
+            // Clear offline timestamp when coming back online
+            const instance = getClient().getInstance(this.rustplus.guildId);
+            const server = instance.serverList[this.rustplus.serverId];
+            if (server?.offlineTimestamps?.[this.steamId]) {
+                delete server.offlineTimestamps[this.steamId];
+                getClient().setInstance(this.rustplus.guildId, instance);
+            }
         }
 
         if (this.isMoved(player)) {
