@@ -146,7 +146,7 @@ module.exports = async (client, guild, steamId) => {
         case 'player': {
           switch (body.type) {
             case 'death': {
-              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, player: death`);
+              // Player death notification - processing silently
               playerDeath(client, guild, title, message, body, discordUserId);
               break;
             }
@@ -159,13 +159,13 @@ module.exports = async (client, guild, steamId) => {
         case 'alarm': {
           switch (body.type) {
             case 'alarm': {
-              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, alarm: alarm`);
+              // Alarm notification received - processing silently
               alarmAlarmLite(client, guild, title, message, body);
               break;
             }
             default: {
-              // Some alarm pushes may not include type; just log for now
-              client.log('FCM LITE', `GuildID: ${guild.id}, SteamID: ${steamId}, alarm: other\n${JSON.stringify(data)}`);
+              // Unknown alarm type - log only to debug level if needed
+              // Removed verbose JSON logging to reduce console spam
               break;
             }
           }

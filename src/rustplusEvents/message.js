@@ -183,12 +183,7 @@ async function messageBroadcastEntityChangedSmartAlarm(rustplus, client, message
   const entityId = message.broadcast.entityChanged.entityId;
   const server = instance.serverList[serverId];
 
-    // Debug: log raw alarm broadcast for troubleshooting (will help confirm receipt)
-    try {
-        client.log('DEBUG', `alarm broadcast received: ${JSON.stringify(message.broadcast.entityChanged)}`);
-    } catch (e) {
-        client.log('DEBUG', 'alarm broadcast received (stringify failed)');
-    }
+    // Debug logging removed - alarm broadcasts are normal operations
 
     if (!server || !server.alarms[entityId]) return;
 
