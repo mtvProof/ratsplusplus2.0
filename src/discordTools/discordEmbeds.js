@@ -832,6 +832,14 @@ module.exports = {
 
         const name = sm.name || `TC ${entityId}`;
 
+        // Check if TC is reachable (not destroyed)
+        if (sm.reachable === false) {
+          tcUpkeepLines.push(
+            `${Constants.OFFLINE_EMOJI} ${name} - \`Destroyed/Unreachable\``
+          );
+          continue;
+        }
+
         // If not electronically connected, show that instead of a stale upkeep value
         if (!rpSm || rpSm.capacity === 0) {
           const notConnectedText = getClient().intlGet(
